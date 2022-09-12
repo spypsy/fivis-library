@@ -1,26 +1,27 @@
+import { Button, Col, Layout, Menu, Row } from 'antd';
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import NavBar from 'components/NavBar';
+import { Login } from 'components/Login';
+
+import './App.less';
+
+const { Header, Content, Footer } = Layout;
+
+const App: React.FC = () => (
+  <Layout className="layout">
+    <NavBar />
+    <Content>
+      <Row>
+        <Col span={12}>
+          <Login />
+        </Col>
+      </Row>
+    </Content>
+  </Layout>
+  // <div className="app">
+  //   <Button type="primary">Howdy</Button>
+  // </div>
+);
 
 export default App;
