@@ -19,9 +19,6 @@ const App: React.FC = () => (
       </Row>
     </Content>
   </Layout>
-  // <div className="app">
-  //   <Button type="primary">Howdy</Button>
-  // </div>
 );
 
 export default App;
