@@ -3,19 +3,44 @@
 @secondary-color: #25430d;
 
 .header {
-  height: 64px;
-  padding-left: 20px;
-  background-color: white;
+  height: 66px;
+  // padding-left: 0;
+  background-color: @primary-color;
+
+  ul {
+    border-bottom: none;
+    background-color: @primary-color;
+
+    li {
+      color: @text-color !important ;
+    }
+  }
 
   .logo {
     float: left;
+    width: 300px;
+    background-color: @primary-color;
+    padding-right: 20px;
     img {
       height: 64px;
     }
   }
+}
 
-  .nav-menu {
+.page {
+  &.login {
+    label {
+      color: @primary-color;
+    }
   }
+}
+
+#book-scan-input {
+  visibility: hidden;
+}
+
+.ant-input {
+  color: @primary-color !important;
 }
 
 .ant-layout-content {

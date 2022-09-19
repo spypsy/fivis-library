@@ -8,7 +8,6 @@ import * as sqlite3 from 'sqlite3';
 import path from 'path';
 
 import DB from './db';
-import { getBookByIsbn } from './services/book';
 import book from './routes/book';
 import auth from './routes/auth';
 
@@ -57,12 +56,6 @@ async function main() {
 
   app.get('/api/hello', (req, res) => {
     res.status(200).send('hello there');
-  });
-
-  app.get('/api/isbn/:isbn', async (req, res) => {
-    const isbn = req.params.isbn;
-    const bookData = await getBookByIsbn(isbn);
-    res.send(bookData);
   });
 
   app.use(express.static(clientPath));

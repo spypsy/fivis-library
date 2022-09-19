@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { AuthorDao } from './Author';
 import { BookUserEntryDao } from './UserEntry';
 
@@ -8,7 +16,7 @@ export class BookDao {
   isbn!: string;
 
   @Column()
-  name: string;
+  title: string;
 
   @ManyToMany(() => AuthorDao, (a) => a.books)
   @JoinColumn()

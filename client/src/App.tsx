@@ -1,24 +1,23 @@
 import { Button, Col, Layout, Menu, Row } from 'antd';
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 
+import Routes from 'routes';
 import NavBar from 'components/NavBar';
-import { Login } from 'components/Login';
 
 import './App.less';
 
-const { Header, Content, Footer } = Layout;
+const { Content } = Layout;
 
 const App: React.FC = () => (
-  <Layout className="layout">
-    <NavBar />
-    <Content>
-      <Row>
-        <Col span={12}>
-          <Login />
-        </Col>
-      </Row>
-    </Content>
-  </Layout>
+  <Router>
+    <Layout className="layout">
+      <NavBar />
+      <Content>
+        <Routes />
+      </Content>
+    </Layout>
+  </Router>
 );
 
 export default App;

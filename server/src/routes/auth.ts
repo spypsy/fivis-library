@@ -45,9 +45,11 @@ export default (db: DB) => {
   router.post(
     '/login',
     passport.authenticate('local', {
-      successRedirect: '/home',
-      failureRedirect: '/login',
+      failureMessage: 'Bad Credentials',
     }),
+    (req, res) => {
+      res.status(200).send(req.user);
+    },
   );
 
   router.post('/logout', function (req, res, next) {
