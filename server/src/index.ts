@@ -5,13 +5,15 @@ import passport from 'passport';
 import axios from 'axios';
 import sqliteStoreFactory from 'express-session-sqlite';
 import * as sqlite3 from 'sqlite3';
+import path from 'path';
 
 import DB from './db';
 import { getBookByIsbn } from './services/book';
 import book from './routes/book';
 import auth from './routes/auth';
 
-// const SqliteStore = require('sqlite3-session-store')(session);
+const clientPath = path.join(__dirname, '../../client/build');
+
 const SqliteStore = sqliteStoreFactory(session);
 
 async function main() {
@@ -49,9 +51,9 @@ async function main() {
   );
   app.use(passport.authenticate('session'));
 
-  app.get('/', (req, res) => {
-    res.send('Hello express');
-  });
+  // app.get('/', (req, res) => {
+  //   res.send('Hello express');
+  // });
 
   app.get('/api/hello', (req, res) => {
     res.status(200).send('hello there');
@@ -61,6 +63,15 @@ async function main() {
     const isbn = req.params.isbn;
     const bookData = await getBookByIsbn(isbn);
     res.send(bookData);
+  });
+
+  app.use(express.static(clientPath));
+
+  app.get('/', (req, res) => {
+    res.sendFile('index.html', {
+      root: clientPath,
+      cacheControl: false,
+    });
   });
 
   app.use('/api/books', bookRouter);
