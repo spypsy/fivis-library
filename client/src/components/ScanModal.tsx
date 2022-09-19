@@ -42,7 +42,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
         setBooks((state) => [...state, bookData]);
       }
     }
-  });
+  }, [bookData, setBooks, books]);
 
   const onSubmit = (value: string) => {
     postBarcode({ url: `/api/books/isbn/${value}` });
@@ -54,8 +54,11 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
       <div id="book-scan-input">
         <Input
           autoFocus
-          onPressEnter={(e) => {
-            onSubmit((e.target as HTMLInputElement)?.value);
+          onChange={(e) => {
+            const value = (e.target as HTMLInputElement)?.value;
+            if (value?.length > 9) {
+              onSubmit(value);
+            }
           }}
         />
       </div>
