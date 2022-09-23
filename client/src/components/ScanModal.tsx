@@ -56,6 +56,8 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
           autoFocus
           onChange={(e) => {
             const value = (e.target as HTMLInputElement)?.value;
+            // debugger
+            console.log(value);
             if (value?.length > 9) {
               onSubmit(value);
             }
