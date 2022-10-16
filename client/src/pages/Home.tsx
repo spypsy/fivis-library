@@ -20,7 +20,7 @@ const Home = () => {
         </Button>
       </Col>
       <Col span={8} />
-      <ScanModal isOpen={showModal} toggleModal={toggleModal} />
+      {showModal && <ScanModal isOpen={showModal} toggleModal={toggleModal} />}
     </Row>
   );
 };

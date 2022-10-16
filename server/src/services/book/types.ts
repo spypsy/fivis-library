@@ -38,6 +38,7 @@ export type ItemResponseData = {
 
 export type VolumeResponseData = {
   title: string;
+  subtitle: string;
   authors: string[];
   publishedDate: Date;
   description: string;
@@ -46,6 +47,7 @@ export type VolumeResponseData = {
     text: boolean;
     image: boolean;
   };
+
   pageCount: number;
   printType: 'BOOK' | 'MAGAZINE';
   categories: string[];
@@ -66,12 +68,22 @@ export type IndustryIdentifier = {
 };
 
 export type BookData = {
+  isbn: string;
   title?: string;
+  subtitle?: string;
   authors?: string[];
   publishedDate?: Date;
   description?: string;
   pageCount?: number;
   printType?: 'BOOK' | 'MAGAZINE';
   categories?: string[];
-  error?: string;
+  language?: string;
+};
+
+export type UserEntryData = {
+  rating: number;
+  comment: string;
+  location: string; // TODO: decide on format later
+  category?: string;
+  subcategory?: string;
 };

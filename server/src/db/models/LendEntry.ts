@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { BookUserEntryDao } from './UserEntry';
+import { BookUserEntryDao } from './BookUserEntry';
 
 @Entity({ name: 'lend_entry' })
 export class BookLendEntryDao {

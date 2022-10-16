@@ -78,7 +78,9 @@ const NavBar = () => {
   return (
     <Header className="header">
       <div className="logo">
-        <Image src={logo} preview={false} />
+        <a href="/home">
+          <Image src={logo} preview={false} />
+        </a>
       </div>
       <Menu
         theme="light"

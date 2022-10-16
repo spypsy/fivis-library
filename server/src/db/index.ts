@@ -4,7 +4,8 @@ import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
 import { BookLendEntryDao } from './models/LendEntry';
 import { UserDao, UserType } from './models/User';
-import { BookUserEntryDao } from './models/UserEntry';
+import { BookUserEntryDao } from './models/BookUserEntry';
+import { BookData, UserEntryData } from '../services/book/types';
 
 export default class DB {
   // private dataSource: DataSource;
@@ -17,6 +18,7 @@ export default class DB {
   constructor(private dataSource: DataSource) {
     this.userRep = this.dataSource.getRepository(UserDao);
     this.bookRep = this.dataSource.getRepository(BookDao);
+    this.bookUserEntryRep = this.dataSource.getRepository(BookUserEntryDao);
     this.authorRep = this.dataSource.getRepository(AuthorDao);
   }
 
@@ -26,7 +28,13 @@ export default class DB {
       database: 'data/sqlite.db',
       synchronize: true,
       logging: true,
-      entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
+      entities: [
+        AuthorDao,
+        BookDao,
+        BookLendEntryDao,
+        BookUserEntryDao,
+        UserDao,
+      ],
       subscribers: [],
       migrations: [],
     });
@@ -55,18 +63,75 @@ export default class DB {
     return this.dataSource.driver;
   }
 
-  public async addBook(book: BookDao) {
-    const { authors } = book;
-    // check if authors already exist
-    if (authors.length) {
+  public async addBook(
+    bookData: BookData,
+    userEntryData: UserEntryData,
+    user: UserDao,
+  ) {
+    let book: BookDao;
+    // check if book already exists
+    const existingBook = await this.getBook(bookData.isbn);
+    if (!existingBook) {
+      book = existingBook;
+    } else {
+      book = new BookDao();
+      book.isbn = bookData.isbn;
+      book.title = bookData.title;
+      book.subtitle = bookData.subtitle;
+      book.pageCount = bookData.pageCount;
+      book.publishedDate = bookData.publishedDate;
+      book.language = bookData.language;
     }
 
+    // create / fetch book authors
+    const { authors } = bookData;
+    let authorEntities: AuthorDao[] = [];
+    // check if authors already exist
+    // if not add them to DB
+    if (authors.length) {
+      for (const authorName of authors) {
+        const author = await this.findAuthorByName(authorName);
+        if (author) {
+          authorEntities.push(author);
+        } else {
+          const newAuthor = new AuthorDao();
+          newAuthor.name = authorName;
+          authorEntities.push(newAuthor);
+        }
+      }
+    }
+    book.authors = authorEntities;
+
+    // create user entry
+    const userEntry = new BookUserEntryDao();
+    userEntry.book = book;
+    userEntry.user = user;
+    userEntry.category = userEntryData.category;
+    userEntry.subcategory = userEntryData.subcategory;
+    userEntry.comment = userEntryData.comment;
+    userEntry.rating = userEntryData.rating;
+    userEntry.location = userEntryData.location;
+    userEntry.addedAt = new Date();
+
+    // append to book's user entires
+    book.userEntries = [...book.userEntries, userEntry];
+
     await this.bookRep.save(book);
+  }
+
+  public async getBook(isbn: string) {
+    const book = await this.bookRep.findOneBy({ isbn });
+    return book;
   }
 
   public async getAllBooks() {
     const books = await this.bookRep.find();
     return books;
+  }
+
+  public async findAuthorByName(name: string) {
+    const author = await this.authorRep.findOneBy({ name });
+    return author;
   }
 
   public async createUser(userData: UserDao) {

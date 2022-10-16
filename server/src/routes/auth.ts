@@ -26,7 +26,7 @@ const verifyUser =
           });
         }
         passport.serializeUser(function (user: UserDao, cb) {
-          cb(null, { id: user.id, username: user.username });
+          cb(null, { id: user.id, username: user.username } as UserDao);
         });
 
         passport.deserializeUser(function (user, cb) {

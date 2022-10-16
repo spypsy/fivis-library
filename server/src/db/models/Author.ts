@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { BookDao } from './Book';
 
 @Entity({ name: 'author' })
@@ -9,6 +16,6 @@ export class AuthorDao {
   @Column()
   name: string;
 
-  @OneToMany(() => BookDao, (b) => b.authors, { cascade: true })
-  books: BookDao[];
+  @OneToMany(() => BookDao, (b) => b.authors)
+  books?: BookDao[];
 }

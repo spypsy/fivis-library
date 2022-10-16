@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Card, Descriptions, Input, List, Modal } from 'antd';
 import useAxios from 'axios-hooks';
@@ -35,6 +35,13 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   ] = useAxios<Book>({}, { manual: true });
   const [books, setBooks] = useState<Book[]>([]);
 
+  const emailInput = React.createRef<HTMLInputElement>();
+
+  useEffect(() => {
+    isOpen && emailInput?.current?.focus();
+    // }
+  }, [emailInput, isOpen]);
+
   useEffect(() => {
     if (bookData) {
       console.log('book', bookData);
@@ -52,17 +59,17 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
     <Modal title="Add Book" visible={isOpen} onCancel={toggleModal}>
       <p>Waiting for scan...</p>
       <div id="book-scan-input">
-        <Input
-          autoFocus
-          onChange={(e) => {
-            const value = (e.target as HTMLInputElement)?.value;
-            // debugger
-            console.log(value);
-            if (value?.length > 9) {
-              onSubmit(value);
-            }
-          }}
-        />
+        {isOpen && (
+          <input
+            autoFocus
+            ref={emailInput}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onSubmit((e.target as HTMLInputElement).value);
+              }
+            }}
+          />
+        )}
       </div>
       <List
         dataSource={books}

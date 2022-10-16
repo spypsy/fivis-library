@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { BookDao } from './Book';
 import { BookLendEntryDao } from './LendEntry';
 import { UserDao } from './User';
@@ -29,10 +36,16 @@ export class BookUserEntryDao {
   @Column('text')
   comment: string;
 
-  @Column()
+  @Column('text')
   location: string; // TODO: decide on format later
 
   @OneToMany(() => BookLendEntryDao, (le) => le.userEntry)
   @JoinColumn()
   lendEntries: BookLendEntryDao[];
+
+  @Column()
+  category?: string;
+
+  @Column()
+  subcategory?: string;
 }

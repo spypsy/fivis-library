@@ -1,6 +1,15 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { BookDao } from './Book';
-import { BookUserEntryDao } from './UserEntry';
+import { BookUserEntryDao } from './BookUserEntry';
 
 export enum UserType {
   ADMIN,

@@ -2,7 +2,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import session from 'express-session';
 import passport from 'passport';
-import axios from 'axios';
 import sqliteStoreFactory from 'express-session-sqlite';
 import * as sqlite3 from 'sqlite3';
 import path from 'path';
@@ -22,8 +21,6 @@ async function main() {
 
   const bookRouter = book(db);
   const authRouter = auth(db);
-
-  const sqliteDbDriver = db.getDbDriver();
 
   app.use(bodyParser.json());
   app.use(
@@ -57,18 +54,16 @@ async function main() {
   app.get('/api/hello', (req, res) => {
     res.status(200).send('hello there');
   });
+  app.use('/api/books', bookRouter);
+  app.use('/api/user', authRouter);
 
   app.use(express.static(clientPath));
-
   app.get('/', (req, res) => {
     res.sendFile('index.html', {
       root: clientPath,
       cacheControl: false,
     });
   });
-
-  app.use('/api/books', bookRouter);
-  app.use('/api/user', authRouter);
 
   app.listen(8080);
 }
