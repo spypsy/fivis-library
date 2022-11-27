@@ -47,7 +47,7 @@ export type VolumeResponseData = {
     text: boolean;
     image: boolean;
   };
-
+  imageLinks?: ImageLinks;
   pageCount: number;
   printType: 'BOOK' | 'MAGAZINE';
   categories: string[];
@@ -62,12 +62,18 @@ export type VolumeResponseData = {
   canonicalVolumeLink: string;
 };
 
+export type ImageLinks = {
+  smallThumbnail: string;
+  thumbnail: string;
+};
+
 export type IndustryIdentifier = {
   type: string;
   identifier: string;
 };
 
 export type BookData = {
+  id: string;
   isbn: string;
   title?: string;
   subtitle?: string;
@@ -78,6 +84,7 @@ export type BookData = {
   printType?: 'BOOK' | 'MAGAZINE';
   categories?: string[];
   language?: string;
+  imageLinks?: ImageLinks;
 };
 
 export type UserEntryData = {

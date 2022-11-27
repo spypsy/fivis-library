@@ -22,6 +22,7 @@ export async function getBookByIsbn(isbn: string): Promise<BookData> {
 
   const responseBookData = result?.data?.items[0]?.volumeInfo;
   return {
+    id: result?.data?.items[0]?.id,
     isbn:
       responseBookData.industryIdentifiers.find(
         ({ type }) => type === 'ISBN_13' || type === 'ISBN_10',
@@ -35,5 +36,8 @@ export async function getBookByIsbn(isbn: string): Promise<BookData> {
     printType: responseBookData.printType,
     categories: responseBookData.categories,
     language: responseBookData.language,
+    imageLinks: responseBookData.imageLinks,
   };
 }
+
+export async function searchBookByTitle(title: string) {}

@@ -12,6 +12,13 @@ export type Book = {
   title?: string;
   authors?: string[];
   publishedDate?: string;
+  imageLinks: ImageLinks;
+  // categories
+};
+
+export type ImageLinks = {
+  smallThumbnail: string;
+  thumbnail: string;
 };
 
 export enum UserType {

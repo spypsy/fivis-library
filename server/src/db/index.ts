@@ -63,6 +63,16 @@ export default class DB {
     return this.dataSource.driver;
   }
 
+  public async addMultipleBooks(
+    booksData: { bookData: BookData; userEntryData: UserEntryData }[],
+    user: UserDao,
+  ) {
+    for (let i = 0; i < booksData.length; i++) {
+      const { bookData, userEntryData } = booksData[i];
+      await this.addBook(bookData, userEntryData, user);
+    }
+  }
+
   public async addBook(
     bookData: BookData,
     userEntryData: UserEntryData,
