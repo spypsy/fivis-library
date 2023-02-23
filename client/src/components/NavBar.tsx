@@ -1,79 +1,31 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
 import { Button, Layout, Menu, Image, MenuProps } from 'antd';
-import {
-  AppstoreOutlined,
-  MailOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { BookOutlined, ScanOutlined } from '@ant-design/icons';
 
 import logo from './logo.png';
 
 const { Header, Content, Footer } = Layout;
 
 const items: MenuProps['items'] = [
-  // {
-  //   label: 'Navigation One',
-  //   key: 'mail',
-  //   icon: <MailOutlined />,
-  // },
-  // {
-  //   label: 'Navigation Two',
-  //   key: 'app',
-  //   icon: <AppstoreOutlined />,
-  //   disabled: true,
-  // },
-  // {
-  //   label: 'Navigation Three - Submenu',
-  //   key: 'SubMenu',
-  //   icon: <SettingOutlined />,
-  //   children: [
-  //     {
-  //       type: 'group',
-  //       label: 'Item 1',
-  //       children: [
-  //         {
-  //           label: 'Option 1',
-  //           key: 'setting:1',
-  //         },
-  //         {
-  //           label: 'Option 2',
-  //           key: 'setting:2',
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       type: 'group',
-  //       label: 'Item 2',
-  //       children: [
-  //         {
-  //           label: 'Option 3',
-  //           key: 'setting:3',
-  //         },
-  //         {
-  //           label: 'Option 4',
-  //           key: 'setting:4',
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: (
-  //     <a href="https://ant.design" target="_blank" rel="noopener noreferrer">
-  //       Navigation Four - Link
-  //     </a>
-  //   ),
-  //   key: 'alipay',
-  // },
+  {
+    label: 'My Books',
+    key: 'my-books',
+    icon: <BookOutlined />,
+  },
+  {
+    label: 'Scan Books',
+    key: 'home',
+    icon: <ScanOutlined />,
+  },
 ];
 
 const NavBar = () => {
-  const [current, setCurrent] = useState('mail');
+  const history = useHistory();
 
   const onClick: MenuProps['onClick'] = (e) => {
     console.log('click ', e);
-    setCurrent(e.key);
+    history.push(`/${e.key}`);
   };
   return (
     <Header className="header">
@@ -87,9 +39,9 @@ const NavBar = () => {
         className="nav-menu"
         items={items}
         onClick={onClick}
-        selectedKeys={[current]}
+        selectedKeys={[history.location.pathname.replace('/', '')]}
         mode="horizontal"
-        defaultSelectedKeys={['1']}
+        defaultSelectedKeys={['scanBooks']}
       />
     </Header>
   );

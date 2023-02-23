@@ -7,8 +7,11 @@ import DB from '../db';
 import { UserDao } from '../db/models/User';
 
 const verifyUser =
-  (db: DB) => async (username: string, password: string, cb: Function) => {
+  (db: DB) => async (username: string, password: string, done: Function) => {
     const user: UserDao = await db.findUserByUsername(username);
+    if (!user) {
+      return done(null, false, { message: 'Incorrect username or password.' });
+    }
 
     crypto.pbkdf2(
       password,
@@ -18,21 +21,23 @@ const verifyUser =
       'sha256',
       (err, hashedPassword) => {
         if (err) {
-          return cb(err);
+          return done(err);
         }
         if (!crypto.timingSafeEqual(user.password, hashedPassword)) {
-          return cb(null, false, {
+          return done(null, false, {
             message: 'Incorrect username or password.',
           });
         }
         passport.serializeUser(function (user: UserDao, cb) {
+          console.log('\n\nserializing\n\n');
           cb(null, { id: user.id, username: user.username } as UserDao);
         });
 
-        passport.deserializeUser(function (user, cb) {
+        passport.deserializeUser(function (user: UserDao, cb) {
+          console.log('\n\ndeserializing user', user, '\n\n');
           return cb(null, user);
         });
-        return cb(null, user);
+        return done(null, user);
       },
     );
   };

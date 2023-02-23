@@ -1,18 +1,15 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import session from 'express-session';
 import passport from 'passport';
-import sqliteStoreFactory from 'express-session-sqlite';
-import * as sqlite3 from 'sqlite3';
 import path from 'path';
 
 import DB from './db';
+import session from './session';
 import book from './routes/book';
 import auth from './routes/auth';
+import author from './routes/author';
 
 const clientPath = path.join(__dirname, '../../client/build');
-
-const SqliteStore = sqliteStoreFactory(session);
 
 async function main() {
   const app = express();
@@ -20,33 +17,13 @@ async function main() {
   const db = await DB.init();
 
   const bookRouter = book(db);
+  const authorRouter = author(db);
   const authRouter = auth(db);
 
   app.use(bodyParser.json());
-  app.use(
-    session({
-      secret: 'wookiee doggo',
-      resave: false,
-      saveUninitialized: false,
-      store: new SqliteStore({
-        // Database library to use. Any library is fine as long as the API is compatible
-        // with sqlite3, such as sqlite3-offline
-        driver: sqlite3.Database,
-        // for in-memory database
-        // path: ':memory:'
-        path: 'data/sqlite.db',
-        // Session TTL in milliseconds
-        ttl: 1234,
-        // (optional) Session id prefix. Default is no prefix.
-        prefix: 'sess:',
-        // (optional) Adjusts the cleanup timer in milliseconds for deleting expired session rows.
-        // Default is 5 minutes.
-        cleanupInterval: 300000,
-      }),
-    }),
-  );
-  app.use(passport.authenticate('session'));
-
+  app.use(session);
+  app.use(passport.initialize());
+  app.use(passport.session());
   // app.get('/', (req, res) => {
   //   res.send('Hello express');
   // });
@@ -55,6 +32,7 @@ async function main() {
     res.status(200).send('hello there');
   });
   app.use('/api/books', bookRouter);
+  app.use('/api/authors', authorRouter);
   app.use('/api/user', authRouter);
 
   app.use(express.static(clientPath));

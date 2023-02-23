@@ -24,28 +24,28 @@ export class BookUserEntryDao {
   @Column()
   addedAt: Date;
 
-  @Column()
-  rating: number;
+  @Column({ nullable: true })
+  rating?: number;
 
-  @Column()
-  isFinished: boolean;
+  @Column({ nullable: true })
+  isFinished?: boolean;
 
-  @Column()
-  finishedAt: Date;
+  @Column({ nullable: true })
+  finishedAt?: Date;
 
-  @Column('text')
-  comment: string;
+  @Column('text', { nullable: true })
+  comment?: string;
 
-  @Column('text')
-  location: string; // TODO: decide on format later
+  @Column('text', { nullable: true })
+  location?: string; // TODO: decide on format later
 
-  @OneToMany(() => BookLendEntryDao, (le) => le.userEntry)
+  @OneToMany(() => BookLendEntryDao, (le) => le.userEntry, { nullable: true })
   @JoinColumn()
-  lendEntries: BookLendEntryDao[];
+  lendEntries?: BookLendEntryDao[];
 
-  @Column()
+  @Column({ nullable: true })
   category?: string;
 
-  @Column()
+  @Column({ nullable: true })
   subcategory?: string;
 }

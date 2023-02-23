@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -22,7 +23,7 @@ export class BookDao {
   subtitle?: string;
 
   @ManyToMany(() => AuthorDao, (a) => a.books, { cascade: true })
-  @JoinColumn()
+  @JoinTable()
   authors: AuthorDao[];
 
   @OneToMany(() => BookUserEntryDao, (ue) => ue.book, { cascade: true })

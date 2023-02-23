@@ -1,6 +1,6 @@
 @import '~antd/dist/antd.less';
 
-@secondary-color: #25430d;
+@secondary-color: #d1e6e8;
 
 .header {
   height: 66px;
@@ -11,8 +11,12 @@
     border-bottom: none;
     background-color: @primary-color;
 
-    li {
-      color: @text-color !important ;
+    .ant-menu-item {
+      color: @secondary-color !important ;
+    }
+    .ant-menu-item-active,
+    .ant-menu-item-selected {
+      color: white !important ;
     }
   }
 
@@ -24,6 +28,10 @@
     img {
       height: 64px;
     }
+  }
+
+  .nav-menu {
+    margin-left: 100px;
   }
 }
 

@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, In } from 'typeorm';
 import crypto from 'crypto';
 import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
@@ -64,13 +64,18 @@ export default class DB {
   }
 
   public async addMultipleBooks(
-    booksData: { bookData: BookData; userEntryData: UserEntryData }[],
-    user: UserDao,
+    booksData: { bookData: BookData; userEntryData?: UserEntryData }[],
+    user: UserDao = { username: 'fivi', id: '1' },
   ) {
+    let booksAdded = 0;
     for (let i = 0; i < booksData.length; i++) {
       const { bookData, userEntryData } = booksData[i];
-      await this.addBook(bookData, userEntryData, user);
+      const wasAdded = await this.addBook(bookData, userEntryData, user);
+      if (wasAdded) {
+        booksAdded++;
+      }
     }
+    return booksAdded;
   }
 
   public async addBook(
@@ -81,7 +86,7 @@ export default class DB {
     let book: BookDao;
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
-    if (!existingBook) {
+    if (existingBook) {
       book = existingBook;
     } else {
       book = new BookDao();
@@ -100,14 +105,13 @@ export default class DB {
     // if not add them to DB
     if (authors.length) {
       for (const authorName of authors) {
-        const author = await this.findAuthorByName(authorName);
-        if (author) {
-          authorEntities.push(author);
-        } else {
-          const newAuthor = new AuthorDao();
-          newAuthor.name = authorName;
-          authorEntities.push(newAuthor);
+        let author = await this.findAuthorByName(authorName);
+        if (!author) {
+          author = new AuthorDao();
+          author.name = authorName;
         }
+        author.books = [...(author.books || []), book];
+        authorEntities.push(author);
       }
     }
     book.authors = authorEntities;
@@ -116,17 +120,26 @@ export default class DB {
     const userEntry = new BookUserEntryDao();
     userEntry.book = book;
     userEntry.user = user;
-    userEntry.category = userEntryData.category;
-    userEntry.subcategory = userEntryData.subcategory;
-    userEntry.comment = userEntryData.comment;
-    userEntry.rating = userEntryData.rating;
-    userEntry.location = userEntryData.location;
+    if (userEntryData) {
+      userEntry.category = userEntryData.category;
+      userEntry.subcategory = userEntryData.subcategory;
+      userEntry.comment = userEntryData.comment;
+      userEntry.rating = userEntryData.rating;
+      userEntry.location = userEntryData.location;
+    }
     userEntry.addedAt = new Date();
 
     // append to book's user entires
-    book.userEntries = [...book.userEntries, userEntry];
+    book.userEntries = [...(book.userEntries || []), userEntry];
 
-    await this.bookRep.save(book);
+    try {
+      await this.bookRep.save(book);
+      // await this.bookRep.save
+    } catch (err) {
+      console.log('err', err);
+      return false;
+    }
+    return true;
   }
 
   public async getBook(isbn: string) {
@@ -134,9 +147,24 @@ export default class DB {
     return book;
   }
 
+  public async getUserBooks(userId: string) {
+    console.log('here');
+    const userData = await this.userRep.findOne({
+      where: { id: userId },
+      relations: { bookEntries: { book: true, user: true } },
+    });
+    console.log(userData.bookEntries.map(({ book }) => book));
+    return userData.bookEntries.map(({ book }) => book);
+  }
+
   public async getAllBooks() {
     const books = await this.bookRep.find();
     return books;
+  }
+
+  public async getAllAuthors() {
+    const authors = await this.authorRep.find();
+    return authors;
   }
 
   public async findAuthorByName(name: string) {

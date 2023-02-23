@@ -16,7 +16,6 @@ export default (db: DB) => {
   // store book
   router.post('/', async (req, res) => {
     const { bookData, userEntryData } = req.body;
-    console.log('\nUSER', req.user, '\n');
     try {
       await db.addBook(bookData, userEntryData, req.user as UserDao);
     } catch (err) {
@@ -27,14 +26,24 @@ export default (db: DB) => {
   });
 
   router.post('/multi', async (req, res) => {
-    const { booksData } = req.body;
+    const booksData = req.body;
+    let numBooksAdded = 0;
     try {
-      await db.addMultipleBooks(booksData, req.user as UserDao);
+      numBooksAdded = await db.addMultipleBooks(booksData, req.user as UserDao);
     } catch (err) {
       return res
         .status(400)
         .send(`Error storing multiple book: ${err.message}`);
     }
+    res.send({ booksAdded: numBooksAdded });
+  });
+
+  router.get('/mine', async (req, res) => {
+    console.log('\n\nreq.user:', req.user, '\n\n');
+    const books = await db.getUserBooks(
+      ((req.user as UserDao) || { username: 'fivi', id: '1' }).id,
+    );
+    res.send(books);
   });
 
   router.get('/hello', (req, res) => {

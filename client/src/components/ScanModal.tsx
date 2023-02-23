@@ -29,29 +29,29 @@ const months = [
 // };
 
 const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
-  const [
-    { data: bookData, loading: bookLoading, error: bookScanError },
-    postBarcode,
-  ] = useAxios<Book>({}, { manual: true });
-  const [books, setBooks] = useState<Book[]>([]);
+  const [{ data: bookData, loading: bookLoading }, postBarcode] =
+    useAxios<Book>({}, { manual: true, useCache: false });
 
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] =
     useAxios<Book[]>({}, { manual: true });
 
-  const emailInput = React.createRef<HTMLInputElement>();
+  const [books, setBooks] = useState<Book[]>([]);
 
+  const isbnInput = React.createRef<HTMLInputElement>();
+
+  // ensure hidden input is focused for barcode scanning
   useEffect(() => {
-    isOpen && emailInput?.current?.focus();
-  }, [emailInput, isOpen]);
+    isOpen && isbnInput?.current?.focus();
+  }, [isbnInput, isOpen]);
 
+  // update UI for newly scanned book
   useEffect(() => {
     if (bookData) {
-      console.log('book', bookData);
       if (bookData.title && !books.find(({ isbn }) => bookData.isbn === isbn)) {
         setBooks((state) => [...state, bookData]);
       }
     }
-  }, [bookData, setBooks, books]);
+  }, [bookData, setBooks]);
 
   const onSubmitBarcode = (value: string) => {
     postBarcode({ url: `/api/books/isbn/${value}` });
@@ -59,15 +59,20 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
 
   const onSubmitUserBooks = () => {
     // TODO: add `userEntryData` for each book here
-    const booksData = books.map((book) => ({ bookData }));
+    const booksData = books.map((book) => ({ bookData: book }));
     if (booksData.length) {
-      submitBooks({ url: '/api/books/multi', data: books });
+      submitBooks({
+        url: '/api/books/multi',
+        data: booksData,
+        method: 'POST',
+      }).then((res) => console.log('result', res));
     }
   };
 
   const removeBook = (isbnToRemove: string | undefined) => {
     if (isbnToRemove) {
-      setBooks(books.filter(({ isbn }) => isbn !== isbnToRemove));
+      const updatedBooks = books.filter(({ isbn }) => isbn !== isbnToRemove);
+      setBooks(updatedBooks);
     }
   };
 
@@ -80,14 +85,14 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
       okText="Submit"
       confirmLoading={bookSaveLoading}
     >
-      <div onClick={() => isOpen && emailInput?.current?.focus()}>
+      <div onClick={() => isOpen && isbnInput?.current?.focus()}>
         <p>Waiting for scan...</p>
         <div id="book-scan-input">
           {isOpen && (
             <input
               disabled={bookLoading}
               autoFocus
-              ref={emailInput}
+              ref={isbnInput}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   onSubmitBarcode((e.target as HTMLInputElement).value);

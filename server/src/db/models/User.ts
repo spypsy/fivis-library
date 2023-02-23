@@ -41,8 +41,8 @@ export class UserDao {
   userType?: UserType;
 
   @Column({ type: 'blob' })
-  password: Buffer;
+  password?: Buffer;
 
   @Column({ type: 'blob' })
-  salt: Buffer;
+  salt?: Buffer;
 }
