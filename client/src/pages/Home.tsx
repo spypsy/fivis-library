@@ -13,7 +13,14 @@ const Home = () => {
     <Row>
       <Col span={8} />{' '}
       <Col span={8}>
-        <h1>Hi, {user.username}!</h1>
+        <h1>
+          Hi,{' '}
+          {user.username
+            ?.split('')
+            ?.map((char, i) => (i === 0 ? char.toUpperCase() : char))
+            ?.join('')}
+          !
+        </h1>
         <h1>Ready to scan some books?</h1>
         <Button type="primary" onClick={toggleModal}>
           Click here!

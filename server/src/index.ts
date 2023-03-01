@@ -36,7 +36,7 @@ async function main() {
   app.use('/api/user', authRouter);
 
   app.use(express.static(clientPath));
-  app.get('/', (req, res) => {
+  app.get('/*', (req, res) => {
     res.sendFile('index.html', {
       root: clientPath,
       cacheControl: false,

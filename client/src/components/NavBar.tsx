@@ -24,7 +24,6 @@ const NavBar = () => {
   const history = useHistory();
 
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e);
     history.push(`/${e.key}`);
   };
   return (
