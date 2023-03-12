@@ -54,7 +54,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   }, [bookData, setBooks]);
 
   const onSubmitBarcode = (value: string) => {
-    postBarcode({ url: `/api/books/isbn/${value}` });
+    postBarcode({ url: `/api/books/search-external/${value}` });
   };
 
   const onSubmitUserBooks = () => {
@@ -65,7 +65,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
         url: '/api/books/multi',
         data: booksData,
         method: 'POST',
-      }).then((res) => console.log('result', res));
+      });
     }
   };
 

@@ -4,6 +4,7 @@ import Welcome from 'pages/Welcome';
 import Login from 'pages/Login';
 import Home from 'pages/Home';
 import MyBooks from 'pages/MyBooks';
+import { Book } from 'pages/Book';
 
 const Routes = () => {
   return (
@@ -19,6 +20,9 @@ const Routes = () => {
       </Route>
       <Route path="/my-books" exact>
         <MyBooks />
+      </Route>
+      <Route path="/book/:isbn">
+        <Book />
       </Route>
     </Switch>
   );

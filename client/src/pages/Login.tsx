@@ -26,7 +26,6 @@ const Login = ({ history }: RouteComponentProps) => {
   }, [loginData, history, setUser]);
 
   const onFinish = (values: any) => {
-    console.log('posting', values);
     postLogin({ data: { ...values } });
   };
 

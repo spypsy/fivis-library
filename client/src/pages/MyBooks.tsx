@@ -1,23 +1,30 @@
 import { Table, Tag } from 'antd';
 import useAxios from 'axios-hooks';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Author, Book } from 'types';
 
 const MyBooks = () => {
   const [{ data: booksData, loading, error }] = useAxios<Book[]>({
     url: '/api/books/mine',
   });
-  console.log(booksData);
   return (
     <div>
-      <Table dataSource={booksData}>
-        <Table.Column title="Title" dataIndex="title" key="title" />
+      <Table dataSource={booksData} rowKey={({ isbn }) => isbn}>
+        <Table.Column
+          title="Title"
+          dataIndex="title"
+          key="title"
+          render={(title: string, book: Book) => {
+            return <Link to={`/book/${book.isbn}`}>{title}</Link>;
+          }}
+        />
         <Table.Column
           title="Publish Date"
           dataIndex="publishedDate"
           key="publishedDate"
           render={(publishedDate) => (
-            <span>
+            <span key={publishedDate}>
               {new Date(publishedDate).toLocaleDateString('en-gb', {
                 year: 'numeric',
                 month: 'numeric',
@@ -31,7 +38,11 @@ const MyBooks = () => {
           dataIndex="authors"
           key="authors"
           render={(authors: Author[]) =>
-            authors.map((author) => <Tag key={author.name}>{author.name}</Tag>)
+            authors.map((author) => (
+              <Tag color="grey" key={author.name}>
+                {author.name}
+              </Tag>
+            ))
           }
         />
         <Table.Column title="ISBN" dataIndex="isbn" key="isbn" />

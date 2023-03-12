@@ -51,7 +51,7 @@ export default (db: DB) => {
   });
 
   // get book data from external API
-  router.get('/isbn/:isbn', async (req, res) => {
+  router.get('/search-external/:isbn', async (req, res) => {
     const isbn = req.params.isbn;
     let bookData;
     let title = '';
@@ -75,9 +75,11 @@ export default (db: DB) => {
     const books = await db.getAllBooks();
     res.send(books);
   });
-  router.get('/:id', (req, res) => {
-    const bookId = req.params.id;
-    res.send();
+  router.get('/:isbn', async (req, res) => {
+    const { isbn } = req.params;
+    const book = await db.getBook(isbn);
+
+    res.send(book);
   });
 
   // router.get('/all', async (req, res) => {

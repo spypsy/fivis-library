@@ -8,7 +8,7 @@ export type User = {
 };
 
 export type Book = {
-  isbn?: string;
+  isbn: string;
   title?: string;
   authors?: Author[];
   publishedDate?: string;
