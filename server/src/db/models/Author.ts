@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
@@ -16,6 +17,6 @@ export class AuthorDao {
   @Column()
   name: string;
 
-  @OneToMany(() => BookDao, (b) => b.authors)
+  @ManyToMany(() => BookDao, (b) => b.authors)
   books?: BookDao[];
 }
