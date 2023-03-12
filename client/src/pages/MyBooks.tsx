@@ -12,7 +12,7 @@ const MyBooks = () => {
     <div>
       {/* <ul>{booksData?.map((obj: Book) => JSON.stringify(obj))}</ul> */}
       <Table dataSource={booksData}>
-        <Table.Column title="Title" dataIndex="title" />
+        <Table.Column title="Title" dataIndex="title" key="title" />
       </Table>
     </div>
   );
