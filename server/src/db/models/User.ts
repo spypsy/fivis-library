@@ -1,13 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BookDao } from './Book';
 import { BookUserEntryDao } from './BookUserEntry';
 
@@ -31,7 +22,6 @@ export class UserDao {
   email?: string;
 
   @OneToMany(() => BookUserEntryDao, (ue) => ue.user, { cascade: true })
-  @JoinColumn()
   bookEntries?: BookUserEntryDao[];
 
   @Column({ unique: true })

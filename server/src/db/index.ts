@@ -14,6 +14,7 @@ export default class DB {
   private bookLendEntryRep: Repository<BookLendEntryDao>;
   private bookUserEntryRep: Repository<BookUserEntryDao>;
   private authorRep: Repository<AuthorDao>;
+  private log = (txt: string) => console.log(`\n\n${txt}\n\n`);
 
   constructor(private dataSource: DataSource) {
     this.userRep = this.dataSource.getRepository(UserDao);
@@ -86,6 +87,16 @@ export default class DB {
     let book: BookDao;
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
+    const existingEntry = await this.bookUserEntryRep.findOne({
+      where: {
+        user: user,
+        book: existingBook,
+      },
+    });
+    this.log(`existing: ${JSON.stringify(existingEntry)}`);
+    if (existingEntry) {
+      return false;
+    }
     if (existingBook) {
       book = existingBook;
     } else {
@@ -110,8 +121,9 @@ export default class DB {
           author = new AuthorDao();
           author.name = authorName;
         }
-        author.books = [...(author.books || []), book];
         authorEntities.push(author);
+        this.log(`author: ${JSON.stringify(author)}`);
+        this.log(`author.books: ${JSON.stringify(author.books)}`);
       }
     }
     book.authors = authorEntities;
@@ -131,10 +143,12 @@ export default class DB {
 
     // append to book's user entires
     book.userEntries = [...(book.userEntries || []), userEntry];
+    this.log('saving book');
+    await this.bookRep.save(book);
 
     try {
-      await this.bookRep.save(book);
-      // await this.bookRep.save
+      this.log('saving userEntry');
+      await this.bookUserEntryRep.save(userEntry);
     } catch (err) {
       console.log('err', err);
       return false;
@@ -148,12 +162,10 @@ export default class DB {
   }
 
   public async getUserBooks(userId: string) {
-    console.log('here');
     const userData = await this.userRep.findOne({
       where: { id: userId },
       relations: { bookEntries: { book: true, user: true } },
     });
-    console.log(userData.bookEntries.map(({ book }) => book));
     return userData.bookEntries.map(({ book }) => book);
   }
 

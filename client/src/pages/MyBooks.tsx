@@ -1,3 +1,4 @@
+import { Table } from 'antd';
 import useAxios from 'axios-hooks';
 import React from 'react';
 import { Book } from 'types';
@@ -9,7 +10,10 @@ const MyBooks = () => {
   console.log(booksData);
   return (
     <div>
-      <ul>{booksData?.map((obj: Book) => JSON.stringify(obj))}</ul>
+      {/* <ul>{booksData?.map((obj: Book) => JSON.stringify(obj))}</ul> */}
+      <Table dataSource={booksData}>
+        <Table.Column title="Title" dataIndex="title" />
+      </Table>
     </div>
   );
 };

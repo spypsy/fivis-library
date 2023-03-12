@@ -16,9 +16,11 @@ export class BookUserEntryDao {
   id!: string;
 
   @ManyToOne(() => UserDao, (u) => u.bookEntries)
+  @JoinColumn()
   user: UserDao;
 
-  @ManyToOne(() => BookDao, (b) => b.userEntries)
+  @ManyToOne(() => BookDao, (b) => b.userEntries, { cascade: true })
+  @JoinColumn()
   book: BookDao;
 
   @Column()
@@ -40,7 +42,6 @@ export class BookUserEntryDao {
   location?: string; // TODO: decide on format later
 
   @OneToMany(() => BookLendEntryDao, (le) => le.userEntry, { nullable: true })
-  @JoinColumn()
   lendEntries?: BookLendEntryDao[];
 
   @Column({ nullable: true })

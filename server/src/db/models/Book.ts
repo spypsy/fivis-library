@@ -1,12 +1,10 @@
 import {
   Column,
   Entity,
-  JoinColumn,
-  JoinTable,
   ManyToMany,
-  ManyToOne,
   OneToMany,
   PrimaryColumn,
+  JoinTable,
 } from 'typeorm';
 import { AuthorDao } from './Author';
 import { BookUserEntryDao } from './BookUserEntry';
@@ -22,12 +20,11 @@ export class BookDao {
   @Column({ nullable: true })
   subtitle?: string;
 
-  @ManyToMany(() => AuthorDao, (a) => a.books, { cascade: true })
+  @ManyToMany(() => AuthorDao, (a) => a.books, { cascade: true, eager: true })
   @JoinTable()
   authors: AuthorDao[];
 
-  @OneToMany(() => BookUserEntryDao, (ue) => ue.book, { cascade: true })
-  @JoinColumn()
+  @OneToMany(() => BookUserEntryDao, (ue) => ue.book)
   userEntries?: BookUserEntryDao[];
 
   @Column()
