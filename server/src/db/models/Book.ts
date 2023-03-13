@@ -35,6 +35,12 @@ export class BookDao {
 
   @Column()
   language: string;
+
+  @Column()
+  imageLink: string;
+
+  @Column()
+  description?: string;
 }
 
 const testData = {

@@ -10,9 +10,15 @@ export type User = {
 export type Book = {
   isbn: string;
   title?: string;
+  subtitle?: string;
+  description?: string;
   authors?: Author[];
   publishedDate?: string;
   imageLinks: ImageLinks;
+  imageLink?: string;
+
+  // USER EDIT FIELDS
+  comment?: string;
 };
 
 export type Author = {

@@ -46,10 +46,6 @@ export default (db: DB) => {
     res.send(books);
   });
 
-  router.get('/hello', (req, res) => {
-    res.send('hi from books API');
-  });
-
   // get book data from external API
   router.get('/search-external/:isbn', async (req, res) => {
     const isbn = req.params.isbn;
@@ -64,10 +60,6 @@ export default (db: DB) => {
         .status(400)
         .send(`Error fetching ISBN: ${isbn}. Message: ${err.message}`);
     }
-    if (!!title) {
-      // try and get original publish date
-      // const bookSearchResult = await
-    }
     res.send(bookData);
   });
 
@@ -75,11 +67,21 @@ export default (db: DB) => {
     const books = await db.getAllBooks();
     res.send(books);
   });
+
   router.get('/:isbn', async (req, res) => {
     const { isbn } = req.params;
     const book = await db.getBook(isbn);
 
     res.send(book);
+  });
+
+  router.put('/:isbn', async (req, res) => {
+    const { isbn } = req.params;
+    const { bookData } = req.body;
+    const userId = ((req.user as UserDao) || { username: 'fivi', id: '1' }).id;
+    await db.updateBook(userId, isbn, bookData);
+
+    res.send().status(200);
   });
 
   // router.get('/all', async (req, res) => {

@@ -104,9 +104,11 @@ export default class DB {
       book.isbn = bookData.isbn;
       book.title = bookData.title;
       book.subtitle = bookData.subtitle;
+      book.description = bookData.description;
       book.pageCount = bookData.pageCount;
       book.publishedDate = bookData.publishedDate;
       book.language = bookData.language;
+      book.imageLink = bookData.imageLinks?.thumbnail;
     }
 
     // create / fetch book authors
@@ -143,11 +145,9 @@ export default class DB {
 
     // append to book's user entires
     book.userEntries = [...(book.userEntries || []), userEntry];
-    this.log('saving book');
     await this.bookRep.save(book);
 
     try {
-      this.log('saving userEntry');
       await this.bookUserEntryRep.save(userEntry);
     } catch (err) {
       console.log('err', err);
@@ -158,7 +158,35 @@ export default class DB {
 
   public async getBook(isbn: string) {
     const book = await this.bookRep.findOneBy({ isbn });
+    console.log('\n\n', book, '\n\n');
     return book;
+  }
+
+  public async updateBook(
+    userId: string,
+    isbn: string,
+    updateData: Partial<BookDao>,
+  ) {
+    const dbBookEntry = await this.getBookEntry(userId, isbn);
+    if (!dbBookEntry) {
+      throw new Error('No book to update.');
+    }
+    const updatedBookEntry = {
+      ...dbBookEntry,
+      ...updateData,
+    };
+
+    await this.bookUserEntryRep.save(updatedBookEntry);
+  }
+
+  public async getBookEntry(userId: string, isbn: string) {
+    const entry = await this.bookUserEntryRep.findOne({
+      where: {
+        user: { id: userId },
+        book: { isbn },
+      },
+    });
+    return entry;
   }
 
   public async getUserBooks(userId: string) {
@@ -166,7 +194,9 @@ export default class DB {
       where: { id: userId },
       relations: { bookEntries: { book: true, user: true } },
     });
-    return userData.bookEntries.map(({ book }) => book);
+    const dbBooks = userData.bookEntries.map(({ book }) => book);
+    // const books =
+    return dbBooks;
   }
 
   public async getAllBooks() {
