@@ -16,9 +16,14 @@ export type Book = {
   publishedDate?: string;
   imageLinks: ImageLinks;
   imageLink?: string;
+  language: string;
 
   // USER EDIT FIELDS
   comment?: string;
+};
+
+export type BookSaveData = {
+  booksAdded: number;
 };
 
 export type Author = {

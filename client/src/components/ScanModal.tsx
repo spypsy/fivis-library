@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Image, List, Modal, Space } from 'antd';
+import { Button, Card, Image, List, Modal, Space, message } from 'antd';
 import useAxios from 'axios-hooks';
-import { Book } from 'types';
+import { Book, BookSaveData } from 'types';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 interface ScanModalProps {
@@ -33,7 +33,16 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
     useAxios<Book>({}, { manual: true, useCache: false });
 
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] =
-    useAxios<Book[]>({}, { manual: true });
+    useAxios<BookSaveData>({}, { manual: true });
+
+  console.log(bookSaveData);
+
+  useEffect(() => {
+    if (!!bookSaveData?.booksAdded) {
+      message.success(`Added ${bookSaveData.booksAdded}`);
+      toggleModal();
+    }
+  }, [bookSaveData, toggleModal]);
 
   const [books, setBooks] = useState<Book[]>([]);
 

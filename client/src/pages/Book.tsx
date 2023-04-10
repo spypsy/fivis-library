@@ -40,7 +40,7 @@ export const Book = () => {
       <Col span={16}>
         <Descriptions
           bordered
-          column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 2, xs: 1 }}
+          column={{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }}
           title={
             <>
               <Image src={bookData?.imageLink}></Image>
@@ -73,6 +73,11 @@ export const Book = () => {
               </Paragraph>
             </Descriptions.Item>
           )}
+          <Descriptions.Item label="Language">
+            <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
+              {bookData?.language}
+            </Paragraph>
+          </Descriptions.Item>
           <Descriptions.Item label="Comment">
             {editMode?.comment ? (
               <Input.TextArea rows={4} value={bookData?.comment} />
