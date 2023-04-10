@@ -87,17 +87,19 @@ export default class DB {
     let book: BookDao;
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
-    const existingEntry = await this.bookUserEntryRep.findOne({
-      where: {
-        user: user,
-        book: existingBook,
-      },
-    });
-    this.log(`existing: ${JSON.stringify(existingEntry)}`);
-    if (existingEntry) {
-      return false;
-    }
     if (existingBook) {
+      console.log('book exists: ', existingBook);
+      const existingEntry = await this.bookUserEntryRep.findOne({
+        where: {
+          user: user,
+          book: existingBook,
+        },
+      });
+      this.log(`existing entry: ${JSON.stringify(existingEntry)}`);
+      if (existingEntry) {
+        return false;
+      }
+
       book = existingBook;
     } else {
       book = new BookDao();
