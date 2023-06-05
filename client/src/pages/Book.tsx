@@ -8,7 +8,7 @@ import useAxios from 'axios-hooks';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { Book as BookType } from 'types';
+import { UserBook } from 'types';
 
 const { Paragraph } = Typography;
 
@@ -20,8 +20,8 @@ export const Book = () => {
   const { isbn } = useParams<{ isbn: string }>();
   const [editMode, setEditMode] = useState<EditFlags>();
 
-  const [book, updateBook] = useState<Partial<BookType>>();
-  const [{ data: bookData, loading, error }] = useAxios<BookType>({
+  const [book, updateBook] = useState<Partial<UserBook>>();
+  const [{ data: bookData, loading, error }] = useAxios<UserBook>({
     url: `/api/books/${isbn}`,
   });
 
@@ -50,7 +50,7 @@ export const Book = () => {
         >
           <Descriptions.Item label="Authors">
             {bookData?.authors?.map((author) => (
-              <span>{author.name}</span>
+              <span key={author.name}>{author.name}</span>
             ))}
           </Descriptions.Item>
 

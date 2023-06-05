@@ -1,13 +1,17 @@
 import { Table, Tag } from 'antd';
-import useAxios from 'axios-hooks';
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Author, Book } from 'types';
-
 const MyBooks = () => {
-  const [{ data: booksData, loading, error }] = useAxios<Book[]>({
-    url: '/api/books/mine',
-  });
+  const [loading, setLoading] = useState(true);
+  const [booksData, setBooksData] = useState<Book[]>([]);
+  useEffect(() => {
+    axios
+      .get('/api/books/mine')
+      .then((res) => setBooksData(res.data))
+      .finally(() => setLoading(false));
+  }, []);
   return (
     <div>
       <Table dataSource={booksData} rowKey={({ isbn }) => isbn}>

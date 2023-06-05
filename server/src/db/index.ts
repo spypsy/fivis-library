@@ -65,13 +65,13 @@ export default class DB {
   }
 
   public async addMultipleBooks(
-    booksData: { bookData: BookData; userEntryData?: UserEntryData }[],
+    booksData: { bookData: BookData & UserEntryData }[],
     user: UserDao = { username: 'fivi', id: '1' },
   ) {
     let booksAdded = 0;
     for (let i = 0; i < booksData.length; i++) {
-      const { bookData, userEntryData } = booksData[i];
-      const wasAdded = await this.addBook(bookData, userEntryData, user);
+      const { bookData } = booksData[i];
+      const wasAdded = await this.addBook(bookData, user);
       if (wasAdded) {
         booksAdded++;
       }
@@ -79,11 +79,7 @@ export default class DB {
     return booksAdded;
   }
 
-  public async addBook(
-    bookData: BookData,
-    userEntryData: UserEntryData,
-    user: UserDao,
-  ) {
+  public async addBook(bookData: BookData & UserEntryData, user: UserDao) {
     let book: BookDao;
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
@@ -136,13 +132,13 @@ export default class DB {
     const userEntry = new BookUserEntryDao();
     userEntry.book = book;
     userEntry.user = user;
-    if (userEntryData) {
-      userEntry.category = userEntryData.category;
-      userEntry.subcategory = userEntryData.subcategory;
-      userEntry.comment = userEntryData.comment;
-      userEntry.rating = userEntryData.rating;
-      userEntry.location = userEntryData.location;
-    }
+    userEntry.category = bookData.category;
+    userEntry.subcategory = bookData.subcategory;
+    userEntry.comment = bookData.comment;
+    userEntry.rating = bookData.rating;
+    userEntry.location = bookData.location;
+    userEntry.originalLanguage = bookData.originalLanguage;
+    userEntry.originalPublishedYear = bookData.originalPublishedYear;
     userEntry.addedAt = new Date();
 
     // append to book's user entires

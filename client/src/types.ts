@@ -1,3 +1,9 @@
+import { languages } from 'countries-list';
+
+export type LangEnum = keyof typeof languages;
+
+export type UserBook = Book & UserEntryFields;
+
 export type User = {
   id?: string;
   firstName?: string;
@@ -16,10 +22,13 @@ export type Book = {
   publishedDate?: string;
   imageLinks: ImageLinks;
   imageLink?: string;
-  language: string;
+  language: LangEnum;
+};
 
-  // USER EDIT FIELDS
+export type UserEntryFields = {
   comment?: string;
+  originalPublishedYear?: number;
+  originalLanguage?: LangEnum;
 };
 
 export type BookSaveData = {

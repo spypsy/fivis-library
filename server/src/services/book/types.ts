@@ -1,3 +1,47 @@
+import { languages } from 'countries-list';
+
+export type LangEnum = keyof typeof languages;
+
+type BaseBookfields = {
+  isbn: string;
+  title: string;
+  subtitle: string;
+  authors: string[];
+  publishedDate: Date;
+  description: string;
+  pageCount: number;
+  printType: 'BOOK' | 'MAGAZINE';
+  language: LangEnum;
+  categories: string[];
+};
+
+export type ImageLinks = {
+  smallThumbnail: string;
+  thumbnail: string;
+};
+
+export type IndustryIdentifier = {
+  type: string;
+  identifier: string;
+};
+
+export type BookData = Partial<BaseBookfields> & {
+  id: string;
+  imageLinks?: ImageLinks;
+  originalPublishedYear?: number;
+  originalLanguage?: LangEnum;
+};
+
+export type UserEntryData = {
+  rating: number;
+  comment: string;
+  location: string; // TODO: decide on format later
+  category?: string;
+  subcategory?: string;
+  originalPublishedYear?: number;
+  originalLanguage?: LangEnum;
+};
+
 export type ResponseData = {
   kind: string;
   totalItems: number;
@@ -36,61 +80,19 @@ export type ItemResponseData = {
   };
 };
 
-export type VolumeResponseData = {
-  title: string;
-  subtitle: string;
-  authors: string[];
-  publishedDate: Date;
-  description: string;
+export type VolumeResponseData = BaseBookfields & {
   industryIdentifiers: IndustryIdentifier[];
   readingModes: {
     text: boolean;
     image: boolean;
   };
   imageLinks?: ImageLinks;
-  pageCount: number;
-  printType: 'BOOK' | 'MAGAZINE';
-  categories: string[];
   averageRating: number;
   ratingsCount: number;
   maturityRating: string;
   allowAnonLogging: boolean;
   contentVersion: string;
-  language: string;
   previewLink: string;
   infoLink: string;
   canonicalVolumeLink: string;
-};
-
-export type ImageLinks = {
-  smallThumbnail: string;
-  thumbnail: string;
-};
-
-export type IndustryIdentifier = {
-  type: string;
-  identifier: string;
-};
-
-export type BookData = {
-  id: string;
-  isbn: string;
-  title?: string;
-  subtitle?: string;
-  authors?: string[];
-  publishedDate?: Date;
-  description?: string;
-  pageCount?: number;
-  printType?: 'BOOK' | 'MAGAZINE';
-  categories?: string[];
-  language?: string;
-  imageLinks?: ImageLinks;
-};
-
-export type UserEntryData = {
-  rating: number;
-  comment: string;
-  location: string; // TODO: decide on format later
-  category?: string;
-  subcategory?: string;
 };

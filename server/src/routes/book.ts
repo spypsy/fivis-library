@@ -7,17 +7,12 @@ import { BookData, UserEntryData } from '../services/book/types';
 
 const router = express.Router();
 
-type BookSubmitData = {
-  bookData: BookData;
-  userBookData: UserEntryData;
-};
-
 export default (db: DB) => {
   // store book
   router.post('/', async (req, res) => {
-    const { bookData, userEntryData } = req.body;
+    const { bookData } = req.body;
     try {
-      await db.addBook(bookData, userEntryData, req.user as UserDao);
+      await db.addBook(bookData, req.user as UserDao);
     } catch (err) {
       return res.status(400).send(`Error storing book: ${err.message}`);
     }

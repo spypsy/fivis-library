@@ -1,73 +1,60 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Image, List, Modal, Space, message } from 'antd';
+import { List, Modal, message } from 'antd';
 import useAxios from 'axios-hooks';
-import { Book, BookSaveData } from 'types';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Book, BookSaveData, UserBook, UserEntryFields } from 'types';
 
-interface ScanModalProps {
+import NewBook from './NewBook';
+
+type ScanModalProps = {
   toggleModal: () => void;
   isOpen: boolean;
-}
-
-const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
-// const formatDate = (date: Date) => {
-//   return `${months[date.getMonth()]} ${date.getFullYear()}`;
-// };
+};
 
 const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
+  const [books, setBooks] = useState<UserBook[]>([]);
+  const [isEditingBook, setEditingBook] = useState<boolean>(false);
+  const [justSearched, setJustSearched] = useState<boolean>(false);
+
   const [{ data: bookData, loading: bookLoading }, postBarcode] =
     useAxios<Book>({}, { manual: true, useCache: false });
 
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] =
     useAxios<BookSaveData>({}, { manual: true });
 
-  console.log(bookSaveData);
-
   useEffect(() => {
     if (!!bookSaveData?.booksAdded) {
-      message.success(`Added ${bookSaveData.booksAdded}`);
-      toggleModal();
+      setJustSearched(false);
+      setBooks([]);
+      message.success(`Added ${bookSaveData.booksAdded} new books.`);
     }
-  }, [bookSaveData, toggleModal]);
-
-  const [books, setBooks] = useState<Book[]>([]);
+  }, [bookSaveData, setBooks]);
 
   const isbnInput = React.createRef<HTMLInputElement>();
 
   // ensure hidden input is focused for barcode scanning
   useEffect(() => {
-    isOpen && isbnInput?.current?.focus();
-  }, [isbnInput, isOpen]);
+    if (!isEditingBook) {
+      isOpen && isbnInput?.current?.focus();
+    }
+  }, [isbnInput, isOpen, isEditingBook]);
 
   // update UI for newly scanned book
   useEffect(() => {
-    if (bookData) {
-      if (bookData.title && !books.find(({ isbn }) => bookData.isbn === isbn)) {
-        setBooks((state) => [...state, bookData]);
-      }
+    if (
+      justSearched &&
+      bookData?.title &&
+      !books.find(({ isbn }) => bookData?.isbn === isbn)
+    ) {
+      setBooks((state) => [...state, bookData]);
     }
-  }, [bookData, setBooks]);
+  }, [bookData, setBooks, books, justSearched]);
 
   const onSubmitBarcode = (value: string) => {
+    setJustSearched(true);
     postBarcode({ url: `/api/books/search-external/${value}` });
   };
 
   const onSubmitUserBooks = () => {
-    // TODO: add `userEntryData` for each book here
     const booksData = books.map((book) => ({ bookData: book }));
     if (booksData.length) {
       submitBooks({
@@ -78,9 +65,24 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
     }
   };
 
+  const createEditBookInfo = (index: number) => (info: UserEntryFields) => {
+    setBooks((state) =>
+      state.map((book, i) => {
+        if (i === index) {
+          return {
+            ...book,
+            ...info,
+          };
+        }
+        return book;
+      }),
+    );
+  };
+
   const removeBook = (isbnToRemove: string | undefined) => {
     if (isbnToRemove) {
       const updatedBooks = books.filter(({ isbn }) => isbn !== isbnToRemove);
+      setJustSearched(false);
       setBooks(updatedBooks);
     }
   };
@@ -92,9 +94,12 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
       onCancel={toggleModal}
       onOk={onSubmitUserBooks}
       okText="Submit"
+      okButtonProps={{ disabled: !books.length }}
       confirmLoading={bookSaveLoading}
     >
-      <div onClick={() => isOpen && isbnInput?.current?.focus()}>
+      <div
+        onClick={() => isOpen && !isEditingBook && isbnInput?.current?.focus()}
+      >
         <p>Waiting for scan...</p>
         <div id="book-scan-input">
           {isOpen && (
@@ -112,43 +117,30 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
           )}
         </div>
         <List
+          loading={bookLoading}
           grid={{
-            gutter: 16,
+            gutter: 12,
             xs: 1,
             sm: 2,
-            md: 4,
-            lg: 4,
-            xl: 6,
+            md: 2,
+            lg: 2,
+            xl: 3,
             xxl: 3,
           }}
           dataSource={books}
-          renderItem={(book) => (
-            <List.Item>
-              <Card title={book.title} className="book-preview">
-                <div>
-                  {book.imageLinks && (
-                    <Image
-                      src={book.imageLinks.thumbnail}
-                      preview={{ src: book.imageLinks.smallThumbnail }}
-                    />
-                  )}
-                  <p>Author: {book.authors?.join(',')}</p>
-                  <p>Published: {book.publishedDate}</p>
-                </div>
-                <Space className="action-buttons">
-                  <Button
-                    danger
-                    type="primary"
-                    shape="circle"
-                    icon={<DeleteOutlined />}
-                    onClick={() => removeBook(book.isbn)}
-                  />
-                  {/* disabled button until edit functionality is added */}
-                  <Button shape="circle" icon={<EditOutlined />} disabled />
-                </Space>
-              </Card>
-            </List.Item>
-          )}
+          renderItem={(book, index) => {
+            const editBookInfo = createEditBookInfo(index);
+            return (
+              <NewBook
+                book={book}
+                userFields={book}
+                editBookInfo={editBookInfo}
+                removeBook={removeBook}
+                onStartEditingBook={() => setEditingBook(true)}
+                onStopEditingBook={() => setEditingBook(false)}
+              />
+            );
+          }}
         />
       </div>
     </Modal>

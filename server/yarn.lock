@@ -704,6 +704,11 @@ cookie@0.5.0:
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
   integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
+countries-list@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/countries-list/-/countries-list-2.6.1.tgz#d479757ac873b1e596ccea0a925962d20396c0cb"
+  integrity sha512-jXM1Nv3U56dPQ1DsUSsEaGmLHburo4fnB7m+1yhWDUVvx5gXCd1ok/y3gXCjXzhqyawG+igcPYcAl4qjkvopaQ==
+
 create-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"

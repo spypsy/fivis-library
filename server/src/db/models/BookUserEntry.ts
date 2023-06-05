@@ -38,6 +38,12 @@ export class BookUserEntryDao {
   @Column('text', { nullable: true })
   comment?: string;
 
+  @Column({ nullable: true })
+  originalPublishedYear?: number;
+
+  @Column({ nullable: true })
+  originalLanguage?: string;
+
   @Column('text', { nullable: true })
   location?: string; // TODO: decide on format later
 
