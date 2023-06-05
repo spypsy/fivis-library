@@ -1,12 +1,9 @@
-import {
-  DownloadOutlined,
-  EditOutlined,
-  SaveOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Col, Descriptions, Image, Input, Row, Typography } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { languages } from 'countries-list';
 
 import { UserBook } from 'types';
 
@@ -75,7 +72,7 @@ export const Book = () => {
           )}
           <Descriptions.Item label="Language">
             <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-              {bookData?.language}
+              {bookData?.language ? languages[bookData?.language].name : ''}
             </Paragraph>
           </Descriptions.Item>
           <Descriptions.Item label="Comment">
