@@ -1,7 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Button, Card, Result, Row, Space, Col } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Result, Row, Space } from 'antd';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Welcome = () => {
@@ -13,7 +13,7 @@ const Welcome = () => {
           title={"Welcome to Fivi's Library!"}
           extra={
             <Button type="primary">
-              <Link to="/login">Login Here</Link>
+              <Link to="/login">Login</Link>
             </Button>
           }
         />

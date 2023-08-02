@@ -1,4 +1,6 @@
+import * as bcrypt from 'bcrypt';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
 import { BookDao } from './Book';
 import { BookUserEntryDao } from './BookUserEntry';
 
@@ -10,29 +12,35 @@ export enum UserType {
 @Entity({ name: 'user' })
 export class UserDao {
   @PrimaryGeneratedColumn()
-  id?: string;
+  id: string;
 
-  @Column()
+  @Column({ nullable: true })
   firstName?: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName?: string;
 
-  @Column()
+  @Column({ nullable: true })
   email?: string;
 
-  @OneToMany(() => BookUserEntryDao, (ue) => ue.user, { cascade: true })
+  @OneToMany(() => BookUserEntryDao, ue => ue.user, { cascade: true })
   bookEntries?: BookUserEntryDao[];
 
   @Column({ unique: true })
   username: string;
 
-  @Column()
+  @Column({ nullable: true })
   userType?: UserType;
 
-  @Column({ type: 'blob' })
-  password?: Buffer;
+  // @Column({ type: 'blob' })
+  // password?: Buffer;
+  @Column()
+  password: string;
 
-  @Column({ type: 'blob' })
-  salt?: Buffer;
+  // @Column({ type: 'blob' })
+  // salt?: Buffer;
+
+  async validatePassword(unencryptedPassword: string) {
+    return bcrypt.compare(unencryptedPassword, this.password);
+  }
 }

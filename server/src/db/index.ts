@@ -1,11 +1,11 @@
-import { DataSource, Repository, In } from 'typeorm';
-import crypto from 'crypto';
+import { DataSource, Repository } from 'typeorm';
+
+import { BookData, UserEntryData } from '../services/book/types';
 import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
-import { BookLendEntryDao } from './models/LendEntry';
-import { UserDao, UserType } from './models/User';
 import { BookUserEntryDao } from './models/BookUserEntry';
-import { BookData, UserEntryData } from '../services/book/types';
+import { BookLendEntryDao } from './models/LendEntry';
+import { UserDao } from './models/User';
 
 export default class DB {
   // private dataSource: DataSource;
@@ -16,7 +16,7 @@ export default class DB {
   private authorRep: Repository<AuthorDao>;
   private log = (txt: string) => console.log(`\n\n${txt}\n\n`);
 
-  constructor(private dataSource: DataSource) {
+  constructor(public dataSource: DataSource) {
     this.userRep = this.dataSource.getRepository(UserDao);
     this.bookRep = this.dataSource.getRepository(BookDao);
     this.bookUserEntryRep = this.dataSource.getRepository(BookUserEntryDao);
@@ -29,33 +29,12 @@ export default class DB {
       database: 'data/sqlite.db',
       synchronize: true,
       logging: true,
-      entities: [
-        AuthorDao,
-        BookDao,
-        BookLendEntryDao,
-        BookUserEntryDao,
-        UserDao,
-      ],
+      entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
       subscribers: [],
       migrations: [],
     });
     await dataSource.initialize();
     const db = new DB(dataSource);
-
-    // add foivi if she doesn't exist
-    const salt = crypto.randomBytes(16);
-    const fivi = await db.findUserByUsername('fivi');
-    if (!fivi) {
-      await db.createUser({
-        username: 'fivi',
-        firstName: 'fivi',
-        lastName: 'theocharaki',
-        email: 'th.phoebe@gmail.com',
-        userType: UserType.READER,
-        password: crypto.pbkdf2Sync('vivlia', salt, 310000, 32, 'sha256'),
-        salt,
-      });
-    }
 
     return db;
   }
@@ -64,10 +43,7 @@ export default class DB {
     return this.dataSource.driver;
   }
 
-  public async addMultipleBooks(
-    booksData: { bookData: BookData & UserEntryData }[],
-    user: UserDao = { username: 'fivi', id: '1' },
-  ) {
+  public async addMultipleBooks(booksData: { bookData: BookData & UserEntryData }[], user: UserDao) {
     let booksAdded = 0;
     for (let i = 0; i < booksData.length; i++) {
       const { bookData } = booksData[i];
@@ -87,8 +63,8 @@ export default class DB {
       console.log('book exists: ', existingBook);
       const existingEntry = await this.bookUserEntryRep.findOne({
         where: {
-          user: user,
-          book: existingBook,
+          user: { id: user.id },
+          book: { isbn: existingBook.isbn },
         },
       });
       this.log(`existing entry: ${JSON.stringify(existingEntry)}`);
@@ -160,11 +136,7 @@ export default class DB {
     return book;
   }
 
-  public async updateBook(
-    userId: string,
-    isbn: string,
-    updateData: Partial<BookDao>,
-  ) {
+  public async updateBook(userId: string, isbn: string, updateData: Partial<BookDao>) {
     const dbBookEntry = await this.getBookEntry(userId, isbn);
     if (!dbBookEntry) {
       throw new Error('No book to update.');

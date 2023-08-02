@@ -6,9 +6,14 @@
     "preserveConstEnums": true,
     "outDir": "./dest",
     "sourceMap": true,
-    "experimentalDecorators":true,
-    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": [
+    "./src/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }

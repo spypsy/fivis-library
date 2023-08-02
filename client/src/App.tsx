@@ -1,23 +1,26 @@
-import { Button, Col, Layout, Menu, Row } from 'antd';
-import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-
-import Routes from 'routes';
+import { Layout } from 'antd';
+import axios from 'axios';
+import { configure } from 'axios-hooks';
 import NavBar from 'components/NavBar';
+import React from 'react';
+import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+import Routes from 'routes';
 
 import './App.less';
 
 const { Content } = Layout;
 
-const App: React.FC = () => (
-  <Router>
-    <Layout className="layout">
-      <NavBar />
-      <Content>
-        <Routes />
-      </Content>
-    </Layout>
-  </Router>
-);
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Layout className="layout">
+        <NavBar />
+        <Content>
+          <Routes />
+        </Content>
+      </Layout>
+    </Router>
+  );
+};
 
 export default App;

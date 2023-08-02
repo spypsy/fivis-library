@@ -1,10 +1,11 @@
-import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import Welcome from 'pages/Welcome';
-import Login from 'pages/Login';
-import Home from 'pages/Home';
-import MyBooks from 'pages/MyBooks';
 import { Book } from 'pages/Book';
+import Home from 'pages/Home';
+import Login from 'pages/Login';
+import MyBooks from 'pages/MyBooks';
+import Register from 'pages/Register';
+import Welcome from 'pages/Welcome';
+import React from 'react';
+import { Redirect, Route, RouteProps, Switch } from 'react-router-dom';
 
 const Routes = () => {
   return (
@@ -14,6 +15,9 @@ const Routes = () => {
       </Route>
       <Route path="/login" exact>
         <Login />
+      </Route>
+      <Route path="/register" exact>
+        <Register />
       </Route>
       <Route path="/home" exact>
         <Home />
@@ -25,6 +29,23 @@ const Routes = () => {
         <Book />
       </Route>
     </Switch>
+  );
+};
+
+const ProtectedRoute: React.FC<RouteProps> = ({ component: Component, ...rest }) => {
+  const isAuthenticated = localStorage.getItem('token'); // Adjust this to your needs
+
+  return (
+    <Route
+      {...rest}
+      render={props =>
+        isAuthenticated && Component ? (
+          <Component {...props} />
+        ) : (
+          <Redirect to="/login" /> // Or /welcome if you prefer
+        )
+      }
+    />
   );
 };
 

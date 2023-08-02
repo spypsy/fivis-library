@@ -4,10 +4,10 @@ import React, { useEffect } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
-const Login = ({ history }: RouteComponentProps) => {
-  const [{ data: loginData, loading: loginLoading, error: loginError }, postLogin] = useAxios(
+const Register = ({ history }: RouteComponentProps) => {
+  const [{ data: registerData, loading: registerLoading, error: loginError }, postRegisterData] = useAxios(
     {
-      url: '/api/user/login',
+      url: '/api/user/register',
       method: 'POST',
     },
     { manual: true },
@@ -16,14 +16,14 @@ const Login = ({ history }: RouteComponentProps) => {
   const [, setUser] = useLocalStorage('user', {});
 
   useEffect(() => {
-    if (loginData?.id) {
-      setUser(loginData);
+    if (registerData?.id) {
+      setUser(registerData);
       history.push('/home');
     }
-  }, [loginData, history, setUser]);
+  }, [registerData, history, setUser]);
 
   const onFinish = (values: any) => {
-    postLogin({ data: { ...values } });
+    postRegisterData({ data: { ...values } });
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -31,7 +31,7 @@ const Login = ({ history }: RouteComponentProps) => {
   };
 
   return (
-    <div className="page login">
+    <div className="page register">
       <Row>
         <Col span={24}>
           <Form
@@ -60,16 +60,16 @@ const Login = ({ history }: RouteComponentProps) => {
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <Button type="primary" htmlType="submit" loading={loginLoading}>
+              <Button type="primary" htmlType="submit" loading={registerLoading}>
                 Submit
               </Button>
             </Form.Item>
           </Form>
-          <a href="/register">Or Sign Up here...</a>
+          Already a user? <Link to="/login">Log in here...</Link>
         </Col>
       </Row>
     </div>
   );
 };
 
-export default withRouter(Login);
+export default withRouter(Register);

@@ -1,13 +1,13 @@
-import express from 'express';
 import bodyParser from 'body-parser';
-import passport from 'passport';
+import cookieParser from 'cookie-parser';
+import express from 'express';
 import path from 'path';
 
 import DB from './db';
-import session from './session';
-import book from './routes/book';
+import { tokenAuth } from './middleware/jwt';
 import auth from './routes/auth';
 import author from './routes/author';
+import book from './routes/book';
 
 const clientPath = path.join(__dirname, '../../client/build');
 
@@ -21,18 +21,13 @@ async function main() {
   const authRouter = auth(db);
 
   app.use(bodyParser.json());
-  app.use(session);
-  app.use(passport.initialize());
-  app.use(passport.session());
-  // app.get('/', (req, res) => {
-  //   res.send('Hello express');
-  // });
+  app.use(cookieParser());
 
   app.get('/api/hello', (req, res) => {
     res.status(200).send('hello there');
   });
-  app.use('/api/books', bookRouter);
-  app.use('/api/authors', authorRouter);
+  app.use('/api/books', tokenAuth, bookRouter);
+  app.use('/api/authors', tokenAuth, authorRouter);
   app.use('/api/user', authRouter);
 
   app.use(express.static(clientPath));
@@ -46,7 +41,7 @@ async function main() {
   app.listen(8080);
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.log('MAIN fn error: ', err);
   process.exit(1);
 });

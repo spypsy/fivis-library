@@ -36,10 +36,14 @@
 }
 
 .page {
-  &.login {
+  &.login,
+  &.register {
     label {
       color: @primary-color;
     }
+  }
+  a:hover {
+    text-decoration: underline;
   }
 }
 
