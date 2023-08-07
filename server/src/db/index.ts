@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, DataSourceOptions, Repository } from 'typeorm';
 
 import { BookData, UserEntryData } from '../services/book/types';
 import { AuthorDao } from './models/Author';
@@ -6,6 +6,40 @@ import { BookDao } from './models/Book';
 import { BookUserEntryDao } from './models/BookUserEntry';
 import { BookLendEntryDao } from './models/LendEntry';
 import { UserDao } from './models/User';
+
+let connectionOptions: DataSourceOptions;
+
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd) {
+  const DATABASE_URL = process.env.DATABASE_URL;
+  if (!DATABASE_URL) {
+    throw new Error('DATABASE_URL must be set in production');
+  }
+
+  connectionOptions = {
+    type: 'postgres',
+    url: DATABASE_URL,
+    synchronize: false,
+    logging: false,
+    entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
+    subscribers: [],
+    migrations: [],
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  };
+} else {
+  connectionOptions = {
+    type: 'sqlite',
+    database: 'data/sqlite.db',
+    synchronize: true,
+    logging: true,
+    entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
+    subscribers: [],
+    migrations: [],
+  };
+}
 
 export default class DB {
   // private dataSource: DataSource;
@@ -24,15 +58,7 @@ export default class DB {
   }
 
   public static async init(): Promise<DB> {
-    const dataSource = new DataSource({
-      type: 'sqlite',
-      database: 'data/sqlite.db',
-      synchronize: true,
-      logging: true,
-      entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
-      subscribers: [],
-      migrations: [],
-    });
+    const dataSource = new DataSource(connectionOptions);
     await dataSource.initialize();
     const db = new DB(dataSource);
 

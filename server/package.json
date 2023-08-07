@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "ts-node ./src/index.ts",
-    "start:debug": "node --inspect-brk=0.0.0.0:9221 ./dest/index.js",
+    "start:debug": "node --inspect-brk=0.0.0.0:9221 ./dist/index.js",
     "start:dev": "JWT_SECRET=foobar tsc-watch -p tsconfig.json --onSuccess 'yarn start'",
     "start:dev-debug": "tsc-watch -p tsconfig.json --onSuccess 'yarn start:debug'"
   },
@@ -22,6 +22,7 @@
     "countries-list": "^2.6.1",
     "express": "^4.18.1",
     "jsonwebtoken": "^9.0.1",
+    "pg": "^8.11.2",
     "typeorm": "^0.3.12"
   },
   "devDependencies": {
