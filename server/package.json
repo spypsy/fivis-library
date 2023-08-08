@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node server/index.js",
+    "start": "source.env && node server/index.js",
     "heroku-postbuild": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json",
     "start:debug": "node --inspect-brk=0.0.0.0:9221 ./dist/index.js",

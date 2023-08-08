@@ -11,35 +11,15 @@ let connectionOptions: DataSourceOptions;
 
 const isProd = process.env.NODE_ENV === 'production';
 
-if (isProd) {
-  const DATABASE_URL = process.env.DATABASE_URL;
-  if (!DATABASE_URL) {
-    throw new Error('DATABASE_URL must be set in production');
-  }
-
-  connectionOptions = {
-    type: 'postgres',
-    url: DATABASE_URL,
-    synchronize: false,
-    logging: false,
-    entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
-    subscribers: [],
-    migrations: [],
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  };
-} else {
-  connectionOptions = {
-    type: 'sqlite',
-    database: 'data/sqlite.db',
-    synchronize: true,
-    logging: true,
-    entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
-    subscribers: [],
-    migrations: [],
-  };
-}
+connectionOptions = {
+  type: 'postgres',
+  url: 'data/sqlite.db',
+  synchronize: !isProd,
+  logging: !isProd,
+  entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
+  subscribers: [],
+  migrations: [],
+};
 
 export default class DB {
   // private dataSource: DataSource;
