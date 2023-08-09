@@ -12,7 +12,8 @@
     "build": "tsc -p tsconfig.json",
     "start:debug": "node --inspect-brk=0.0.0.0:9221 ./dist/index.js",
     "start:dev": "JWT_SECRET=foobar tsc-watch -p tsconfig.json --onSuccess 'yarn start'",
-    "start:dev-debug": "tsc-watch -p tsconfig.json --onSuccess 'yarn start:debug'"
+    "start:dev-debug": "tsc-watch -p tsconfig.json --onSuccess 'yarn start:debug'",
+    "prebuild": "cd ../client && yarn install && yarn build && mv build ../server/client-artifacts"
   },
   "dependencies": {
     "axios": "^1.4.0",

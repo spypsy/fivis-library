@@ -9,7 +9,7 @@ import auth from './routes/auth';
 import author from './routes/author';
 import book from './routes/book';
 
-const clientPath = path.join(__dirname, '../../client/build');
+const clientPath = path.join(__dirname, '../client-artifacts');
 
 async function main() {
   const app = express();
