@@ -37,7 +37,6 @@ async function main() {
       cacheControl: false,
     });
   });
-
   app.listen(process.env.PORT || 8080);
 }
 
