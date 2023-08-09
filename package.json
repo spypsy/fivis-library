@@ -1,6 +1,5 @@
 {
   "scripts": {
-    "build-client": "cd client && npm install && npm run build",
-    "postinstall": "npm run build-client && sh buildpack-run.sh"
+    "postinstall": "sh prep_deploy.sh"
   }
 }
