@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useLocalStorage } from 'usehooks-ts';
-import { User } from 'types';
-import { Button, Col, Row } from 'antd';
+import { Button, Col, Row, Spin } from 'antd';
+import useAxios from 'axios-hooks';
 import ScanModal from 'components/ScanModal';
+import React, { useState } from 'react';
+import { User } from 'types';
 
 const Home = () => {
-  const [user] = useLocalStorage<User>('user', {});
+  const [{ data: userData, loading }] = useAxios('/api/user/info', { manual: false });
   const [showModal, setShowModal] = useState(false);
-  const toggleModal = () => setShowModal((state) => !state);
+  const toggleModal = () => setShowModal(state => !state);
+  if (loading) {
+    return <Spin />;
+  }
+  debugger;
+  const user = userData.user as User;
   return (
     <Row>
       <Col span={8} />{' '}

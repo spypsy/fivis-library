@@ -1,3 +1,5 @@
+import { Spin } from 'antd';
+import { useCheckAuth } from 'hooks/unauthorizedEffect';
 import { Book } from 'pages/Book';
 import Home from 'pages/Home';
 import Login from 'pages/Login';
@@ -19,34 +21,23 @@ const Routes = () => {
       <Route path="/register" exact>
         <Register />
       </Route>
-      <Route path="/home" exact>
-        <Home />
-      </Route>
-      <Route path="/my-books" exact>
-        <MyBooks />
-      </Route>
-      <Route path="/book/:isbn">
-        <Book />
-      </Route>
+      <ProtectedRoute component={Home} path="/home" exact />
+      <ProtectedRoute component={MyBooks} path="/my-books" exact />
+      <ProtectedRoute component={Book} path="/book/:isbn" />
     </Switch>
   );
 };
 
-const ProtectedRoute: React.FC<RouteProps> = ({ component: Component, ...rest }) => {
-  const isAuthenticated = localStorage.getItem('token'); // Adjust this to your needs
+interface ProtectedRouteProps extends RouteProps {
+  // Using React.ComponentType allows you to accept both functional and class components
+  component: React.ComponentType<any>;
+}
 
-  return (
-    <Route
-      {...rest}
-      render={props =>
-        isAuthenticated && Component ? (
-          <Component {...props} />
-        ) : (
-          <Redirect to="/login" /> // Or /welcome if you prefer
-        )
-      }
-    />
-  );
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, ...rest }) => {
+  // const isAuthenticated = checkIfUserIsAuthenticated();
+  const { isAuthed, loading } = useCheckAuth();
+
+  return <Route {...rest} render={props => (isAuthed ? <Component {...props} /> : <Redirect to="/login" />)} />;
 };
 
 export default Routes;

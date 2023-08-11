@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken';
 
 import DB from '../db';
 import { UserDao } from '../db/models/User';
+import { UserAuthRequest, tokenAuth } from '../middleware/jwt';
 
 export default (db: DB) => {
   const router = Router();
@@ -55,7 +56,30 @@ export default (db: DB) => {
       sameSite: 'strict',
     });
 
-    return res.send({ message: 'Logged in successfully', user: { ...user, password: null } });
+    console.log('user', user);
+    return res.send({ message: 'Logged in successfully', user: { ...user, password: undefined } });
+  });
+
+  router.post('/logout', (req, res) => {
+    // Invalidate session or do other server-side logout logic here
+
+    // Overwrite the auth cookie to expire immediately
+    res.cookie('token', '', { expires: new Date(0), httpOnly: true, secure: true });
+
+    res.status(200).send('Logged out');
+  });
+
+  router.get('/info', tokenAuth, async (req: UserAuthRequest, res) => {
+    console.log('getting info');
+    console.log('req.user', req.user);
+    return res.json({
+      user: {
+        username: req.user.username,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        email: req.user.email,
+      },
+    });
   });
 
   return router;

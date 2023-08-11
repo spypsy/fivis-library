@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import path from 'path';
 
-import DB from './db';
+import DB, { DbSingleton } from './db';
 import { tokenAuth } from './middleware/jwt';
 import auth from './routes/auth';
 import author from './routes/author';
@@ -14,7 +14,7 @@ const clientPath = path.join(__dirname, '../client-artifacts');
 async function main() {
   const app = express();
 
-  const db = await DB.init();
+  const db = await DbSingleton.get();
 
   const bookRouter = book(db);
   const authorRouter = author(db);
@@ -29,6 +29,9 @@ async function main() {
   app.use('/api/books', tokenAuth, bookRouter);
   app.use('/api/authors', tokenAuth, authorRouter);
   app.use('/api/user', authRouter);
+  app.use('/api/check-auth', tokenAuth, (req, res) => {
+    return res.status(200);
+  });
 
   app.use(express.static(clientPath));
   app.get('/*', (req, res) => {

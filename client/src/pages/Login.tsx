@@ -1,11 +1,12 @@
-import { Button, Col, Form, Input, Row } from 'antd';
+import { Button, Col, Form, Input, Row, message } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { User } from 'types';
 import { useLocalStorage } from 'usehooks-ts';
 
 const Login = ({ history }: RouteComponentProps) => {
-  const [{ data: loginData, loading: loginLoading, error: loginError }, postLogin] = useAxios(
+  const [{ data: loginData, loading: loginLoading }, postLogin] = useAxios<{ user: User }>(
     {
       url: '/api/user/login',
       method: 'POST',
@@ -13,12 +14,13 @@ const Login = ({ history }: RouteComponentProps) => {
     { manual: true },
   );
 
-  const [, setUser] = useLocalStorage('user', {});
+  const [, setUser] = useLocalStorage<User>('user', {});
 
   useEffect(() => {
-    if (loginData?.id) {
-      setUser(loginData);
+    if (loginData?.user?.id) {
+      setUser(loginData.user);
       history.push('/home');
+      message.success(`Logged in as ${loginData.user.username}`);
     }
   }, [loginData, history, setUser]);
 
@@ -63,9 +65,10 @@ const Login = ({ history }: RouteComponentProps) => {
               <Button type="primary" htmlType="submit" loading={loginLoading}>
                 Submit
               </Button>
+              <br />
+              <Link to="/register">Or Sign Up here...</Link>
             </Form.Item>
           </Form>
-          <a href="/register">Or Sign Up here...</a>
         </Col>
       </Row>
     </div>

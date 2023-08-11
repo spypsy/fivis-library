@@ -63,9 +63,10 @@ const Register = ({ history }: RouteComponentProps) => {
               <Button type="primary" htmlType="submit" loading={registerLoading}>
                 Submit
               </Button>
+              <br />
+              Already a user? <Link to="/login">Log in here...</Link>
             </Form.Item>
           </Form>
-          Already a user? <Link to="/login">Log in here...</Link>
         </Col>
       </Row>
     </div>

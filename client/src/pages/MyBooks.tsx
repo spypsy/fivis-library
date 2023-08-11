@@ -1,13 +1,11 @@
 import { Table, Tag } from 'antd';
 import useAxios from 'axios-hooks';
-import { useCheckAuthError } from 'hooks/unauthorizedEffect';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Author, Book } from 'types';
 
 const MyBooks = () => {
   const [{ data: booksData, loading, error }] = useAxios('/api/books/mine', { manual: false });
-  useCheckAuthError(error);
   return (
     <div>
       <Table loading={loading} dataSource={booksData} rowKey={({ isbn }) => isbn}>

@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "postinstall": "sh prep_deploy.sh"
-  }
-}
