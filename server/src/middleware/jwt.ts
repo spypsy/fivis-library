@@ -10,7 +10,6 @@ export interface UserAuthRequest extends Request {
 
 export function tokenAuth(req: UserAuthRequest, res: Response, next: NextFunction) {
   const token = req.cookies.token;
-  console.log('token', token);
 
   if (token == null) {
     console.log('no token');
