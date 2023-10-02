@@ -12,7 +12,6 @@
     "start:debug": "node --inspect-brk=0.0.0.0:9221 ./dist/index.js",
     "start:dev": "JWT_SECRET=foobar tsc-watch -p tsconfig.json --onSuccess 'yarn start'",
     "start:dev-debug": "tsc-watch -p tsconfig.json --onSuccess 'yarn start:debug'",
-    "heroku-postbuild": "cd .. && ./prep_deploy.sh"
   },
   "dependencies": {
     "axios": "^1.4.0",

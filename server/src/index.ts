@@ -9,7 +9,7 @@ import book from './api/book';
 import DB, { DbSingleton } from './db';
 import { tokenAuth } from './middleware/jwt';
 
-const clientPath = path.join(__dirname, '../client-artifacts');
+const clientPath = path.join(__dirname, '../../client/build');
 
 async function main() {
   const app = express();
