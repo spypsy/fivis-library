@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { List, Modal, message } from 'antd';
 import useAxios from 'axios-hooks';
+import React, { useEffect, useState } from 'react';
 import { Book, BookSaveData, UserBook, UserEntryFields } from 'types';
 
 import NewBook from './NewBook';
@@ -15,19 +15,18 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   const [isEditingBook, setEditingBook] = useState<boolean>(false);
   const [justSearched, setJustSearched] = useState<boolean>(false);
 
-  const [{ data: bookData, loading: bookLoading }, postBarcode] =
-    useAxios<Book>({}, { manual: true, useCache: false });
+  const [{ data: bookData, loading: bookLoading }, postBarcode] = useAxios<Book>({}, { manual: true, useCache: false });
 
-  const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] =
-    useAxios<BookSaveData>({}, { manual: true });
+  const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] = useAxios<BookSaveData>({}, { manual: true });
 
   useEffect(() => {
     if (!!bookSaveData?.booksAdded) {
       setJustSearched(false);
       setBooks([]);
       message.success(`Added ${bookSaveData.booksAdded} new books.`);
+      toggleModal();
     }
-  }, [bookSaveData, setBooks]);
+  }, [bookSaveData, setBooks, toggleModal]);
 
   const isbnInput = React.createRef<HTMLInputElement>();
 
@@ -40,12 +39,8 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
 
   // update UI for newly scanned book
   useEffect(() => {
-    if (
-      justSearched &&
-      bookData?.title &&
-      !books.find(({ isbn }) => bookData?.isbn === isbn)
-    ) {
-      setBooks((state) => [...state, bookData]);
+    if (justSearched && bookData?.title && !books.find(({ isbn }) => bookData?.isbn === isbn)) {
+      setBooks(state => [...state, bookData]);
     }
   }, [bookData, setBooks, books, justSearched]);
 
@@ -55,7 +50,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   };
 
   const onSubmitUserBooks = () => {
-    const booksData = books.map((book) => ({ bookData: book }));
+    const booksData = books.map(book => ({ bookData: book }));
     if (booksData.length) {
       submitBooks({
         url: '/api/books/multi',
@@ -66,7 +61,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   };
 
   const createEditBookInfo = (index: number) => (info: UserEntryFields) => {
-    setBooks((state) =>
+    setBooks(state =>
       state.map((book, i) => {
         if (i === index) {
           return {
@@ -97,9 +92,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
       okButtonProps={{ disabled: !books.length }}
       confirmLoading={bookSaveLoading}
     >
-      <div
-        onClick={() => isOpen && !isEditingBook && isbnInput?.current?.focus()}
-      >
+      <div onClick={() => isOpen && !isEditingBook && isbnInput?.current?.focus()}>
         <p>Waiting for scan...</p>
         <div id="book-scan-input">
           {isOpen && (
@@ -107,7 +100,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
               disabled={bookLoading}
               autoFocus
               ref={isbnInput}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter') {
                   onSubmitBarcode((e.target as HTMLInputElement).value);
                   (e.target as HTMLInputElement).value = '';

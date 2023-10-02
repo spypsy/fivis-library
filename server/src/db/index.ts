@@ -9,8 +9,6 @@ import { UserDao } from './models/User';
 
 let connectionOptions: DataSourceOptions;
 
-const isProd = process.env.NODE_ENV === 'production';
-
 connectionOptions = {
   type: 'sqlite',
   database: 'data/sqlite.db',
@@ -101,7 +99,7 @@ export default class DB {
       book.description = bookData.description;
       book.pageCount = bookData.pageCount;
       book.publishedDate = bookData.publishedDate;
-      book.language = bookData.language.toString();
+      book.language = bookData.language?.toString();
       book.imageLink = bookData.imageLinks?.thumbnail;
     }
 
@@ -133,7 +131,7 @@ export default class DB {
     userEntry.comment = bookData.comment;
     userEntry.rating = bookData.rating;
     userEntry.location = bookData.location;
-    userEntry.originalLanguage = bookData.originalLanguage.toString();
+    userEntry.originalLanguage = bookData.originalLanguage?.toString();
     userEntry.originalPublishedYear = bookData.originalPublishedYear;
     userEntry.addedAt = new Date();
 

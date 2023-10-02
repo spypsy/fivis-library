@@ -58,11 +58,18 @@ export default (db: DB) => {
     res.send(books);
   });
 
-  router.get('/:isbn', async (req, res) => {
+  router.get('/:isbn', async (req: UserAuthRequest, res) => {
     const { isbn } = req.params;
     const book = await db.getBook(isbn);
+    const bookEntry = await db.getBookEntry(req.user.id, isbn);
 
-    res.send(book);
+    console.log('book');
+    console.log(book);
+
+    res.send({
+      ...book,
+      ...bookEntry,
+    });
   });
 
   router.put('/:isbn', async (req: UserAuthRequest, res) => {

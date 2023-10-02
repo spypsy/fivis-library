@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Button, Card, Image, Input, List, Select } from 'antd';
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import { Button, Card, Image, Input, List, Select } from 'antd';
 import { languages } from 'countries-list';
-
+import React, { useState } from 'react';
 import { Book, UserEntryFields } from 'types';
 
 type NewBookProps = {
@@ -38,10 +37,7 @@ const NewBook = ({
       <Card title={book.title} className="book-preview">
         <div>
           {book.imageLinks && (
-            <Image
-              src={book.imageLinks.thumbnail}
-              preview={{ src: book.imageLinks.smallThumbnail }}
-            />
+            <Image src={book.imageLinks.thumbnail} preview={{ src: book.imageLinks.smallThumbnail }} />
           )}
           <p>Author: {book.authors?.join(', ')}</p>
           {book.publishedDate && <p>Published: {book.publishedDate}</p>}
@@ -50,9 +46,7 @@ const NewBook = ({
             <p>Originally Published: {userFields.originalPublishedYear}</p>
           )}
           {!isEditingBook && userFields.originalLanguage && (
-            <p>
-              Original Language: {languages[userFields.originalLanguage].name}
-            </p>
+            <p>Original Language: {languages[userFields.originalLanguage].name}</p>
           )}
           {/** EDIT FIELDS */}
           {isEditingBook && (
@@ -61,7 +55,7 @@ const NewBook = ({
                 placeholder="Originally Published Year"
                 type="number"
                 value={userFields.originalPublishedYear}
-                onChange={(e) =>
+                onChange={e =>
                   editBookInfo({
                     originalPublishedYear: Number(e.target.value),
                   })
@@ -71,16 +65,12 @@ const NewBook = ({
                 showSearch
                 placeholder="Original Language"
                 defaultValue={userFields.originalLanguage}
-                onChange={(value) => {
+                onChange={value => {
                   editBookInfo({
                     originalLanguage: value,
                   });
                 }}
-                filterOption={(input, option) =>
-                  (option?.label ?? '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
+                filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
                 options={Object.entries(languages).map(([key, lang]) => ({
                   label: lang.name,
                   value: key,

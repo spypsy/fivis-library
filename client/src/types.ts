@@ -29,6 +29,7 @@ export type UserEntryFields = {
   comment?: string;
   originalPublishedYear?: number;
   originalLanguage?: LangEnum;
+  addedAt?: Date;
 };
 
 export type BookSaveData = {

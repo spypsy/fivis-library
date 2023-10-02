@@ -20,6 +20,7 @@ export default (db: DB) => {
     const user = new UserDao();
     user.username = username;
     user.password = await bcrypt.hash(password, 10);
+    console.log('user', user);
 
     await db.createUser(user);
 

@@ -3,11 +3,11 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import path from 'path';
 
+import auth from './api/auth';
+import author from './api/author';
+import book from './api/book';
 import DB, { DbSingleton } from './db';
 import { tokenAuth } from './middleware/jwt';
-import auth from './routes/auth';
-import author from './routes/author';
-import book from './routes/book';
 
 const clientPath = path.join(__dirname, '../client-artifacts');
 

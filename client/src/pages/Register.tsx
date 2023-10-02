@@ -1,11 +1,13 @@
-import { Button, Col, Form, Input, Row } from 'antd';
+import { Button, Col, Form, Input, Row, message } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
-import { useLocalStorage } from 'usehooks-ts';
+import { User } from 'types';
 
 const Register = ({ history }: RouteComponentProps) => {
-  const [{ data: registerData, loading: registerLoading, error: loginError }, postRegisterData] = useAxios(
+  const [{ data: registerData, loading: registerLoading, error: signupError }, postRegisterData] = useAxios<{
+    user: User;
+  }>(
     {
       url: '/api/user/register',
       method: 'POST',
@@ -13,14 +15,15 @@ const Register = ({ history }: RouteComponentProps) => {
     { manual: true },
   );
 
-  const [, setUser] = useLocalStorage('user', {});
-
   useEffect(() => {
-    if (registerData?.id) {
-      setUser(registerData);
-      history.push('/home');
+    if (registerData?.user?.id) {
+      message.success('User created! Please login.');
+      history.push('/login');
     }
-  }, [registerData, history, setUser]);
+    if (signupError) {
+      message.error(`Something went wrong: ${signupError.message}`);
+    }
+  }, [registerData, history, signupError]);
 
   const onFinish = (values: any) => {
     postRegisterData({ data: { ...values } });
