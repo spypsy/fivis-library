@@ -6,7 +6,7 @@ import { User } from 'types';
 import { useLocalStorage } from 'usehooks-ts';
 
 const Login = ({ history }: RouteComponentProps) => {
-  const [{ data: loginData, loading: loginLoading }, postLogin] = useAxios<{ user: User }>(
+  const [{ data: loginData, loading: loginLoading, error }, postLogin] = useAxios<{ user: User }>(
     {
       url: '/api/user/login',
       method: 'POST',
@@ -17,12 +17,15 @@ const Login = ({ history }: RouteComponentProps) => {
   const [, setUser] = useLocalStorage<User>('user', {});
 
   useEffect(() => {
+    if (error) {
+      message.error(error.response?.data.message || error.message);
+    }
     if (loginData?.user?.id) {
       setUser(loginData.user);
       history.push('/home');
       message.success(`Logged in as ${loginData.user.username}`);
     }
-  }, [loginData, history, setUser]);
+  }, [loginData, history, setUser, error]);
 
   const onFinish = (values: any) => {
     postLogin({ data: { ...values } });

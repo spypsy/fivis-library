@@ -1,12 +1,5 @@
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryColumn,
-  JoinTable,
-} from 'typeorm';
 import { languages } from 'countries-list';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 
 import { AuthorDao } from './Author';
 import { BookUserEntryDao } from './BookUserEntry';
@@ -22,11 +15,14 @@ export class BookDao {
   @Column({ nullable: true })
   subtitle?: string;
 
-  @ManyToMany(() => AuthorDao, (a) => a.books, { cascade: true, eager: true })
+  @ManyToMany(() => AuthorDao, a => a.books, { cascade: true, eager: true })
   @JoinTable()
   authors: AuthorDao[];
 
-  @OneToMany(() => BookUserEntryDao, (ue) => ue.book)
+  @Column()
+  publisher: string;
+
+  @OneToMany(() => BookUserEntryDao, ue => ue.book)
   userEntries?: BookUserEntryDao[];
 
   @Column()
@@ -84,12 +80,9 @@ const testData = {
         allowAnonLogging: false,
         contentVersion: 'preview-1.0.0',
         language: 'en',
-        previewLink:
-          'http://books.google.co.uk/books?id=G_hdPwAACAAJ&dq=isbn:9780395647387&hl=&cd=1&source=gbs_api',
-        infoLink:
-          'http://books.google.co.uk/books?id=G_hdPwAACAAJ&dq=isbn:9780395647387&hl=&source=gbs_api',
-        canonicalVolumeLink:
-          'https://books.google.com/books/about/The_Fellowship_of_the_Ring.html?hl=&id=G_hdPwAACAAJ',
+        previewLink: 'http://books.google.co.uk/books?id=G_hdPwAACAAJ&dq=isbn:9780395647387&hl=&cd=1&source=gbs_api',
+        infoLink: 'http://books.google.co.uk/books?id=G_hdPwAACAAJ&dq=isbn:9780395647387&hl=&source=gbs_api',
+        canonicalVolumeLink: 'https://books.google.com/books/about/The_Fellowship_of_the_Ring.html?hl=&id=G_hdPwAACAAJ',
       },
       saleInfo: {
         country: 'GB',
@@ -108,8 +101,7 @@ const testData = {
         pdf: {
           isAvailable: false,
         },
-        webReaderLink:
-          'http://play.google.com/books/reader?id=G_hdPwAACAAJ&hl=&printsec=frontcover&source=gbs_api',
+        webReaderLink: 'http://play.google.com/books/reader?id=G_hdPwAACAAJ&hl=&printsec=frontcover&source=gbs_api',
         accessViewStatus: 'NONE',
         quoteSharingAllowed: false,
       },

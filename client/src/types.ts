@@ -19,6 +19,7 @@ export type Book = {
   subtitle?: string;
   description?: string;
   authors?: Author[];
+  publisher: string;
   publishedDate?: string;
   imageLinks: ImageLinks;
   imageLink?: string;

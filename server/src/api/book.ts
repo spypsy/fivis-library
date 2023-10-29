@@ -33,8 +33,7 @@ export default (db: DB) => {
   });
 
   router.get('/mine', async (req: UserAuthRequest, res) => {
-    console.log('\n\nreq.user:', req.user, '\n\n');
-    const books = await db.getUserBooks((req.user || { username: 'fivi', id: '1' }).id);
+    const books = await db.getUserBooks(req.user.id);
     res.send(books);
   });
 

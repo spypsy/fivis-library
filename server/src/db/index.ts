@@ -99,6 +99,7 @@ export default class DB {
       book.description = bookData.description;
       book.pageCount = bookData.pageCount;
       book.publishedDate = bookData.publishedDate;
+      book.publisher = bookData.publisher;
       book.language = bookData.language?.toString();
       book.imageLink = bookData.imageLinks?.thumbnail;
     }

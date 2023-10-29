@@ -11,7 +11,6 @@ const Home = () => {
   if (loading) {
     return <Spin />;
   }
-  debugger;
   const user = userData.user as User;
   return (
     <Row>

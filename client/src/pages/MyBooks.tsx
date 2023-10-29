@@ -8,6 +8,7 @@ const MyBooks = () => {
   const [{ data: booksData, loading, error }] = useAxios('/api/books/mine', { manual: false });
   return (
     <div>
+      Total: {booksData.length}
       <Table loading={loading} dataSource={booksData} rowKey={({ isbn }) => isbn}>
         <Table.Column
           title="Title"

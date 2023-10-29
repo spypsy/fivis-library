@@ -7,6 +7,7 @@ type BaseBookfields = {
   title: string;
   subtitle: string;
   authors: string[];
+  publisher: string;
   publishedDate: Date;
   description: string;
   pageCount: number;

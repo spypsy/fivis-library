@@ -41,6 +41,8 @@ export const Book = () => {
               {bookData?.authors?.map(author => <span key={author.name}>{author.name}</span>)}
             </Descriptions.Item>
 
+            <Descriptions.Item label="Publisher">{bookData?.publisher}</Descriptions.Item>
+
             {bookData?.publishedDate && (
               <Descriptions.Item label="Published Date">
                 {new Date(bookData?.publishedDate).toLocaleDateString('en-gb', {

@@ -41,6 +41,7 @@ const NewBook = ({
           )}
           <p>Author: {book.authors?.join(', ')}</p>
           {book.publishedDate && <p>Published: {book.publishedDate}</p>}
+          {book.publisher && <p>Publisher: {book.publisher}</p>}
           {book.language && <p>Language: {languages[book.language].name}</p>}
           {!isEditingBook && userFields.originalPublishedYear && (
             <p>Originally Published: {userFields.originalPublishedYear}</p>
