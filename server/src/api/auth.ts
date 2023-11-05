@@ -54,7 +54,7 @@ export default (db: DB) => {
     res.cookie('token', token, {
       httpOnly: true,
       // secure: true, // set to true if your application is using https
-      sameSite: 'strict',
+      sameSite: 'lax',
     });
 
     console.log('user', user);
