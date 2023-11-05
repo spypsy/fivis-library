@@ -18,7 +18,7 @@ const Login = ({ history }: RouteComponentProps) => {
 
   useEffect(() => {
     if (error) {
-      message.error(error.response?.data.message || error.message);
+      message.error(error.response?.data?.message || error.message);
     }
     if (loginData?.user?.id) {
       setUser(loginData.user);
