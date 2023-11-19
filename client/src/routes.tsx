@@ -1,4 +1,3 @@
-import { Spin } from 'antd';
 import { useCheckAuth } from 'hooks/unauthorizedEffect';
 import { Book } from 'pages/Book';
 import Home from 'pages/Home';
@@ -35,7 +34,7 @@ interface ProtectedRouteProps extends RouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, ...rest }) => {
   // const isAuthenticated = checkIfUserIsAuthenticated();
-  const { isAuthed, loading } = useCheckAuth();
+  const { isAuthed } = useCheckAuth();
 
   return <Route {...rest} render={props => (isAuthed ? <Component {...props} /> : <Redirect to="/login" />)} />;
 };

@@ -5,11 +5,16 @@ import { Link } from 'react-router-dom';
 import { Author, Book } from 'types';
 
 const MyBooks = () => {
-  const [{ data: booksData, loading, error }] = useAxios('/api/books/mine', { manual: false });
+  const [{ data: booksData, loading }] = useAxios('/api/books/mine', { manual: false });
   return (
     <div>
       Total: {booksData?.length}
-      <Table loading={loading} dataSource={booksData} rowKey={({ isbn }) => isbn}>
+      <Table
+        loading={loading}
+        dataSource={booksData}
+        rowKey={({ isbn }) => isbn}
+        pagination={{ showSizeChanger: true, pageSizeOptions: ['10', '25', '50', '100'], defaultPageSize: 25 }}
+      >
         <Table.Column
           title="Title"
           dataIndex="title"
@@ -44,7 +49,7 @@ const MyBooks = () => {
             ))
           }
         />
-        <Table.Column title="ISBN" dataIndex="isbn" key="isbn" />
+        <Table.Column title="Publisher" dataIndex="publisher" key="publisher" />
       </Table>
     </div>
   );

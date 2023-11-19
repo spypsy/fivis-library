@@ -1,5 +1,5 @@
 import { BookOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Result, Row } from 'antd';
+import { Button, Col, Result, Row } from 'antd';
 import React from 'react';
 import { Link } from 'react-router-dom';
 

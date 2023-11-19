@@ -1,9 +1,7 @@
 import { Layout } from 'antd';
-import axios from 'axios';
-import { configure } from 'axios-hooks';
 import NavBar from 'components/NavBar';
 import React from 'react';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import Routes from 'routes';
 
 import './App.less';

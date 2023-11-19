@@ -1,8 +1,8 @@
 import { EditOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Col, Descriptions, Image, Input, Row, Skeleton, Spin, Typography } from 'antd';
+import { Button, Col, Descriptions, Image, Input, Row, Skeleton, Typography } from 'antd';
 import useAxios from 'axios-hooks';
 import { languages } from 'countries-list';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { UserBook } from 'types';
 
@@ -16,7 +16,7 @@ export const Book = () => {
   const { isbn } = useParams<{ isbn: string }>();
   const [editMode, setEditMode] = useState<EditFlags>();
 
-  const [{ data: bookData, loading, error }] = useAxios<UserBook>({
+  const [{ data: bookData, loading }] = useAxios<UserBook>({
     url: `/api/books/${isbn}`,
   });
 
