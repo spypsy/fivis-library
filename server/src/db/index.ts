@@ -9,6 +9,12 @@ import { UserDao } from './models/User';
 
 let connectionOptions: DataSourceOptions;
 
+enum AddedStatus {
+  ADDED,
+  ALREADY_EXISTS,
+  ERROR,
+}
+
 connectionOptions = {
   type: 'sqlite',
   database: 'data/sqlite.db',
@@ -63,14 +69,18 @@ export default class DB {
 
   public async addMultipleBooks(booksData: { bookData: BookData & UserEntryData }[], user: UserDao) {
     let booksAdded = 0;
+    // ISBNs of books that already exist in DB
+    let duplicates: string[] = [];
     for (let i = 0; i < booksData.length; i++) {
       const { bookData } = booksData[i];
       const wasAdded = await this.addBook(bookData, user);
-      if (wasAdded) {
+      if (wasAdded === AddedStatus.ADDED) {
         booksAdded++;
+      } else if (wasAdded === AddedStatus.ALREADY_EXISTS) {
+        duplicates.push(bookData.isbn);
       }
     }
-    return booksAdded;
+    return { booksAdded, duplicates };
   }
 
   public async addBook(bookData: BookData & UserEntryData, user: UserDao) {
@@ -87,7 +97,7 @@ export default class DB {
       });
       this.log(`existing entry: ${JSON.stringify(existingEntry)}`);
       if (existingEntry) {
-        return false;
+        return AddedStatus.ALREADY_EXISTS;
       }
 
       book = existingBook;
@@ -144,9 +154,9 @@ export default class DB {
       await this.bookUserEntryRep.save(userEntry);
     } catch (err) {
       console.log('err', err);
-      return false;
+      return AddedStatus.ERROR;
     }
-    return true;
+    return AddedStatus.ADDED;
   }
 
   public async getBook(isbn: string) {

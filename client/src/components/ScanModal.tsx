@@ -20,13 +20,26 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] = useAxios<BookSaveData>({}, { manual: true });
 
   useEffect(() => {
+    if (!!bookSaveData?.duplicates?.length) {
+      const duplicateTitles = bookSaveData.duplicates.map(isbn => books.find(b => b.isbn === isbn)?.title);
+      message.warning(
+        <div>
+          Some books were not added because they already exist in the database.
+          <List size="small">
+            {duplicateTitles.map((title, index) => (
+              <List.Item key={index}>{title}</List.Item>
+            ))}
+          </List>
+        </div>,
+      );
+    }
     if (!!bookSaveData?.booksAdded) {
       setJustSearched(false);
       setBooks([]);
       message.success(`Added ${bookSaveData.booksAdded} new books.`);
       toggleModal();
     }
-  }, [bookSaveData, setBooks, toggleModal]);
+  }, [bookSaveData, setBooks, toggleModal, books]);
 
   const isbnInput = React.createRef<HTMLInputElement>();
 

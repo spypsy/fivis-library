@@ -23,13 +23,13 @@ export default (db: DB) => {
 
   router.post('/multi', async (req: UserAuthRequest, res) => {
     const booksData = req.body;
-    let numBooksAdded = 0;
+    let result;
     try {
-      numBooksAdded = await db.addMultipleBooks(booksData, req.user);
+      result = await db.addMultipleBooks(booksData, req.user);
     } catch (err) {
       return res.status(400).send(`Error storing multiple book: ${err.message}`);
     }
-    res.send({ booksAdded: numBooksAdded });
+    res.send(result);
   });
 
   router.get('/mine', async (req: UserAuthRequest, res) => {

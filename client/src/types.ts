@@ -35,6 +35,7 @@ export type UserEntryFields = {
 
 export type BookSaveData = {
   booksAdded: number;
+  duplicates: string[];
 };
 
 export type Author = {
