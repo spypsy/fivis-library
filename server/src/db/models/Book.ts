@@ -19,8 +19,8 @@ export class BookDao {
   @JoinTable()
   authors: AuthorDao[];
 
-  @Column()
-  publisher: string;
+  @Column({ nullable: true })
+  publisher?: string;
 
   @OneToMany(() => BookUserEntryDao, ue => ue.book)
   userEntries?: BookUserEntryDao[];
