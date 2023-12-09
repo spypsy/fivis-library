@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
 import path from 'path';
 
@@ -19,7 +20,11 @@ async function main() {
   const bookRouter = book(db);
   const authorRouter = author(db);
   const authRouter = auth(db);
-
+  const corsOptions = {
+    origin: 'http://fivislibrary.com',
+    credentials: true,
+  };
+  app.use(cors(corsOptions));
   app.use(bodyParser.json());
   app.use(cookieParser());
 

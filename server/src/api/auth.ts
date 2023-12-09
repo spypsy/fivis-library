@@ -52,9 +52,12 @@ export default (db: DB) => {
 
     // Set JWT as a cookie on the client
     res.cookie('token', token, {
+      domain: '.fivislibrary.com',
+      path: '/',
       httpOnly: true,
       // secure: true, // set to true if your application is using https
       sameSite: 'none',
+      maxAge: 1000 * 60 * 60 * 24 * 30, // cookie expiration, in milliseconds
     });
 
     console.log('user', user);
