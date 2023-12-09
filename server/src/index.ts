@@ -35,7 +35,7 @@ async function main() {
   app.use('/api/authors', tokenAuth, authorRouter);
   app.use('/api/user', authRouter);
   app.use('/api/check-auth', tokenAuth, (req, res) => {
-    return res.status(200);
+    return res.status(200).send();
   });
 
   app.use(express.static(clientPath));
