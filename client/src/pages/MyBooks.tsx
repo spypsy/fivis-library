@@ -24,15 +24,13 @@ const MyBooks = () => {
           }}
         />
         <Table.Column
-          title="Publish Date"
+          title="Publish Year"
           dataIndex="publishedDate"
           key="publishedDate"
           render={publishedDate => (
             <span key={publishedDate}>
               {new Date(publishedDate).toLocaleDateString('en-gb', {
                 year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
               })}
             </span>
           )}

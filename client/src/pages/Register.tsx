@@ -17,7 +17,7 @@ const Register = ({ history }: RouteComponentProps) => {
 
   useEffect(() => {
     if (registerData?.user?.id) {
-      message.success('User created! Please login.');
+      message.success('User created! Please login.', 0.5);
       history.push('/login');
     }
     if (signupError) {

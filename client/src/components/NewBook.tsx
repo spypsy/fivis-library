@@ -49,6 +49,7 @@ const NewBook = ({
           {!isEditingBook && userFields.originalLanguage && (
             <p>Original Language: {languages[userFields.originalLanguage].name}</p>
           )}
+          {!isEditingBook && userFields.comment && <p>Comment: {userFields.comment}</p>}
           {/** EDIT FIELDS */}
           {isEditingBook && (
             <div className="edit-fields">
@@ -77,7 +78,16 @@ const NewBook = ({
                   value: key,
                 }))}
               />
-              <Input.TextArea rows={4} placeholder="Add a comment..." />
+              <Input.TextArea
+                rows={4}
+                placeholder="Add a comment..."
+                value={userFields.comment}
+                onChange={e =>
+                  editBookInfo({
+                    comment: e.target.value,
+                  })
+                }
+              />
             </div>
           )}
         </div>

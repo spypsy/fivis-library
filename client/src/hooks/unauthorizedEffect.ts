@@ -7,7 +7,7 @@ export function useCheckAuth() {
   n += 1;
   console.log('using axios', n);
   if (error?.response?.status === 401) {
-    message.error('Please login or register to access this page');
+    message.error('Please login or register to access this page', 0.75);
     return { loading, isAuthed: false };
   }
   return { loading, isAuthed: true };

@@ -36,7 +36,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
     if (!!bookSaveData?.booksAdded) {
       setJustSearched(false);
       setBooks([]);
-      message.success(`Added ${bookSaveData.booksAdded} new books.`);
+      message.success(`Added ${bookSaveData.booksAdded} new books.`, 0.75);
       toggleModal();
     }
   }, [bookSaveData, setBooks, toggleModal, books]);

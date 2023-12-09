@@ -194,6 +194,7 @@ export default class DB {
       relations: { bookEntries: { book: true, user: true } },
     });
     const dbBooks = userData.bookEntries.map(({ book }) => book);
+    console.log(dbBooks);
     return dbBooks;
   }
 
