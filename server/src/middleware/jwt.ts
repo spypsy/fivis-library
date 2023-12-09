@@ -7,22 +7,32 @@ import { UserDao } from '../db/models/User';
 export interface UserAuthRequest extends Request {
   user: UserDao; // or any other type
 }
-
 export function tokenAuth(req: UserAuthRequest, res: Response, next: NextFunction) {
   const token = req.cookies.token;
 
-  if (token == null) {
+  if (!token) {
     console.log('no token');
-    return res.sendStatus(401); // if there isn't any token
+    return res.sendStatus(401);
   }
 
-  jwt.verify(token, process.env.JWT_SECRET as string, async (err: any, user: any) => {
+  jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
     if (err) {
       console.log('jwt verify failed');
       return res.sendStatus(403);
     }
-    const db = await DbSingleton.get();
-    req.user = await db.getUserById(user.userId);
-    next(); // pass the execution off to whatever request the client intended
+
+    // Handle async operations outside of jwt.verify callback
+    async function fetchUser() {
+      try {
+        const db = await DbSingleton.get();
+        req.user = await db.getUserById(user.userId);
+        next();
+      } catch (error) {
+        console.error('Database operation failed', error);
+        return res.sendStatus(500);
+      }
+    }
+
+    fetchUser();
   });
 }
