@@ -18,7 +18,7 @@ const Home = () => {
       <Col span={8}>
         <h1>
           Hi,{' '}
-          {user.username
+          {user?.username
             ?.split('')
             ?.map((char, i) => (i === 0 ? char.toUpperCase() : char))
             ?.join('')}
