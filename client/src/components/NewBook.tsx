@@ -49,7 +49,11 @@ const NewBook = ({
           {!isEditingBook && userFields.originalLanguage && (
             <p>Original Language: {languages[userFields.originalLanguage].name}</p>
           )}
-          {!isEditingBook && userFields.comment && <p>Comment: {userFields.comment}</p>}
+          {!isEditingBook && userFields.comment && (
+            <p>
+              Comment: <p className="comment-value">{userFields.comment}</p>
+            </p>
+          )}
           {/** EDIT FIELDS */}
           {isEditingBook && (
             <div className="edit-fields">
@@ -82,11 +86,12 @@ const NewBook = ({
                 rows={4}
                 placeholder="Add a comment..."
                 value={userFields.comment}
-                onChange={e =>
+                onChange={e => {
+                  console.log(e.target.value);
                   editBookInfo({
                     comment: e.target.value,
-                  })
-                }
+                  });
+                }}
               />
             </div>
           )}

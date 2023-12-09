@@ -84,7 +84,7 @@ export const Book = () => {
             )}
             <Descriptions.Item label="Comment">
               {editMode?.comment ? <Input.TextArea rows={4} value={bookData?.comment} /> : editMode?.comment}
-              {bookData?.comment && <p>{bookData.comment}</p>}
+              {bookData?.comment && <p className="comment-value">{bookData.comment}</p>}
               {/* <Button
                 type="primary"
                 shape="circle"
