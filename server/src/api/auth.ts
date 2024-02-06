@@ -52,8 +52,8 @@ export default (db: DB) => {
 
     // Set JWT as a cookie on the client
     res.cookie('token', token, {
-      // domain: '.fivislibrary.com',
-      domain: 'localhost',
+      domain: '.fivislibrary.com',
+      // domain: 'localhost',
       httpOnly: true,
       // secure: true, // set to true if your application is using https
       sameSite: 'lax',

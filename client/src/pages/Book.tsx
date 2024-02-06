@@ -1,5 +1,4 @@
-import { EditOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Col, Descriptions, Image, Input, Row, Skeleton, Typography } from 'antd';
+import { Col, Descriptions, Image, Input, Row, Skeleton, Typography } from 'antd';
 import useAxios from 'axios-hooks';
 import { languages } from 'countries-list';
 import { useState } from 'react';
