@@ -34,8 +34,8 @@ export class BookDao {
   @Column()
   language: string;
 
-  @Column()
-  imageLink: string;
+  @Column({ nullable: true })
+  imageLink?: string;
 
   @Column()
   description?: string;

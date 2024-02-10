@@ -21,7 +21,7 @@ async function main() {
   const authorRouter = author(db);
   const authRouter = auth(db);
   const corsOptions = {
-    origin: 'http://fivislibrary.com',
+    origin: process.env.NODE_ENV === 'dev' ? 'http://localhost' : 'http://fivislibrary.com',
     credentials: true,
   };
   app.use(cors(corsOptions));

@@ -31,7 +31,7 @@ export const Book = () => {
             column={{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }}
             title={
               <>
-                <Image src={bookData?.imageLink}></Image>
+                {bookData?.imageLink && <Image src={bookData.imageLink}></Image>}
                 {bookData?.title}
               </>
             }

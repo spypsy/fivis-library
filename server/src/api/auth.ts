@@ -51,9 +51,9 @@ export default (db: DB) => {
     );
 
     // Set JWT as a cookie on the client
+    console.log('node env', process.env.NODE_ENV);
     res.cookie('token', token, {
-      domain: '.fivislibrary.com',
-      // domain: 'localhost',
+      domain: process.env.NODE_ENV === 'dev' ? 'localhost' : '.fivislibrary.com',
       httpOnly: true,
       // secure: true, // set to true if your application is using https
       sameSite: 'lax',
