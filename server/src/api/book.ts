@@ -62,9 +62,6 @@ export default (db: DB) => {
     const book = await db.getBook(isbn);
     const bookEntry = await db.getBookEntry(req.user.id, isbn);
 
-    console.log('book');
-    console.log(book);
-
     res.send({
       ...book,
       ...bookEntry,

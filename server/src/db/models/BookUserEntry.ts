@@ -2,12 +2,16 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { BookDao } from './Book';
 import { BookLendEntryDao } from './LendEntry';
+import { TagDao } from './Tag';
 import { UserDao } from './User';
 
 @Entity({ name: 'user_entry' })
@@ -15,13 +19,20 @@ export class BookUserEntryDao {
   @PrimaryGeneratedColumn()
   id!: string;
 
-  @ManyToOne(() => UserDao, (u) => u.bookEntries)
+  @ManyToOne(() => UserDao, u => u.bookEntries)
   @JoinColumn()
   user: UserDao;
 
-  @ManyToOne(() => BookDao, (b) => b.userEntries, { cascade: true })
+  @ManyToOne(() => BookDao, b => b.userEntries, { cascade: true })
   @JoinColumn()
   book: BookDao;
+
+  @Column({ nullable: true })
+  publisher?: string;
+
+  @ManyToMany(() => TagDao, tag => tag.books)
+  @JoinTable()
+  tags?: TagDao[];
 
   @Column()
   addedAt: Date;
@@ -47,7 +58,7 @@ export class BookUserEntryDao {
   @Column('text', { nullable: true })
   location?: string; // TODO: decide on format later
 
-  @OneToMany(() => BookLendEntryDao, (le) => le.userEntry, { nullable: true })
+  @OneToMany(() => BookLendEntryDao, le => le.userEntry, { nullable: true })
   lendEntries?: BookLendEntryDao[];
 
   @Column({ nullable: true })

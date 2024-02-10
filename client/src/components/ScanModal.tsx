@@ -1,7 +1,7 @@
 import { List, Modal, message } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect, useState } from 'react';
-import { Book, BookSaveData, UserBook, UserEntryFields } from 'types';
+import { Book, BookSaveData, Tag, UserBook, UserEntryFields } from 'types';
 
 import NewBook from './NewBook';
 
@@ -18,6 +18,8 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   const [{ data: bookData, loading: bookLoading }, postBarcode] = useAxios<Book>({}, { manual: true, useCache: false });
 
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] = useAxios<BookSaveData>({}, { manual: true });
+
+  const [{ data: tagsData, loading: tagsLoading }] = useAxios<Tag[]>('/api/tags', { useCache: false });
 
   useEffect(() => {
     if (!!bookSaveData?.duplicates?.length) {
@@ -140,6 +142,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
               <NewBook
                 book={book}
                 userFields={book}
+                tags={tagsData || []}
                 editBookInfo={editBookInfo}
                 removeBook={removeBook}
                 onStartEditingBook={() => setEditingBook(true)}

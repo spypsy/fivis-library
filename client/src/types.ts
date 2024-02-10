@@ -4,6 +4,11 @@ export type LangEnum = keyof typeof languages;
 
 export type UserBook = Book & UserEntryFields;
 
+export type Tag = {
+  id?: string;
+  name: string;
+};
+
 export type User = {
   id?: string;
   firstName?: string;
@@ -27,10 +32,12 @@ export type Book = {
 };
 
 export type UserEntryFields = {
+  publisher?: string;
   comment?: string;
   originalPublishedYear?: number;
   originalLanguage?: LangEnum;
   addedAt?: Date;
+  tags?: Tag[];
 };
 
 export type BookSaveData = {

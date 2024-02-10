@@ -37,6 +37,10 @@ async function main() {
   app.use('/api/check-auth', tokenAuth, (req, res) => {
     return res.status(200).send();
   });
+  app.use('/api/tags', tokenAuth, async (req, res) => {
+    const tags = (await db.getTags()) || [];
+    res.send(tags);
+  });
 
   app.use(express.static(clientPath));
   app.get('/*', (req, res) => {

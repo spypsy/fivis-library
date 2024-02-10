@@ -20,7 +20,11 @@ const MyBooks = () => {
           dataIndex="title"
           key="title"
           render={(title: string, book: Book) => {
-            return <Link to={`/book/${book.isbn}`}>{title}</Link>;
+            return (
+              <Link to={`/book/${book.isbn}`}>
+                <b>{title}</b>
+              </Link>
+            );
           }}
         />
         <Table.Column
@@ -41,7 +45,7 @@ const MyBooks = () => {
           key="authors"
           render={(authors: Author[]) =>
             authors.map(author => (
-              <Tag color="grey" key={author.name}>
+              <Tag color="purple" key={author.name}>
                 {author.name}
               </Tag>
             ))

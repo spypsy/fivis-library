@@ -20,7 +20,6 @@ export default (db: DB) => {
     const user = new UserDao();
     user.username = username;
     user.password = await bcrypt.hash(password, 10);
-    console.log('user', user);
 
     await db.createUser(user);
 
@@ -51,7 +50,6 @@ export default (db: DB) => {
     );
 
     // Set JWT as a cookie on the client
-    console.log('node env', process.env.NODE_ENV);
     res.cookie('token', token, {
       domain: process.env.NODE_ENV === 'dev' ? 'localhost' : '.fivislibrary.com',
       httpOnly: true,
@@ -60,7 +58,6 @@ export default (db: DB) => {
       maxAge: 1000 * 60 * 60 * 24 * 30, // cookie expiration, in milliseconds
     });
 
-    console.log('user', user);
     return res.send({ message: 'Logged in successfully', user: { ...user, password: undefined } });
   });
 
@@ -74,8 +71,6 @@ export default (db: DB) => {
   });
 
   router.get('/info', tokenAuth, async (req: UserAuthRequest, res) => {
-    console.log('getting info');
-    console.log('req.user', req.user);
     return res.json({
       user: {
         username: req.user.username,

@@ -2,12 +2,17 @@ import { languages } from 'countries-list';
 
 export type LangEnum = keyof typeof languages;
 
+export type Tag = {
+  id?: string;
+  name: string;
+};
+
 type BaseBookfields = {
   isbn: string;
   title: string;
   subtitle: string;
   authors: string[];
-  publisher: string;
+  publisher?: string;
   publishedDate: Date;
   description: string;
   pageCount: number;
@@ -41,6 +46,7 @@ export type UserEntryData = {
   subcategory?: string;
   originalPublishedYear?: number;
   originalLanguage?: LangEnum;
+  tags: Tag[];
 };
 
 export type ResponseData = {

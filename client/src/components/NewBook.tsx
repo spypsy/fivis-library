@@ -1,12 +1,13 @@
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Card, Image, Input, List, Select } from 'antd';
+import { Button, Card, Image, Input, List, Select, Tag } from 'antd';
 import { languages } from 'countries-list';
 import React, { useState } from 'react';
-import { Book, UserEntryFields } from 'types';
+import { Book, Tag as TagType, UserEntryFields } from 'types';
 
 type NewBookProps = {
   book: Book;
   userFields: UserEntryFields;
+  tags: TagType[];
   editBookInfo: (info: Partial<UserEntryFields>) => void;
   removeBook: (isbn: string) => void;
   onStartEditingBook: () => void;
@@ -16,6 +17,7 @@ type NewBookProps = {
 const NewBook = ({
   book,
   userFields,
+  tags,
   editBookInfo,
   removeBook,
   onStartEditingBook,
@@ -41,8 +43,30 @@ const NewBook = ({
           )}
           <p>Author: {book.authors?.join(', ')}</p>
           {book.publishedDate && <p>Published: {book.publishedDate}</p>}
-          {book.publisher && <p>Publisher: {book.publisher}</p>}
           {book.language && <p>Language: {languages[book.language].name}</p>}
+          {(book.publisher || isEditingBook) &&
+            (isEditingBook ? (
+              <p>
+                {' '}
+                Publisher:{' '}
+                <Input
+                  style={{ display: 'inline-block', width: 'auto' }}
+                  value={userFields.publisher || book.publisher}
+                  onChange={e => editBookInfo({ publisher: e.target.value || '' })}
+                ></Input>
+              </p>
+            ) : (
+              <p>Publisher: {book.publisher}</p>
+            ))}
+
+          {!isEditingBook && !!userFields.tags?.length && (
+            <p>
+              Tags:{' '}
+              {userFields.tags.map(tag => (
+                <Tag key={tag.name}>{tag.name}</Tag>
+              ))}
+            </p>
+          )}
           {!isEditingBook && userFields.originalPublishedYear && (
             <p>Originally Published: {userFields.originalPublishedYear}</p>
           )}
@@ -57,6 +81,17 @@ const NewBook = ({
           {/** EDIT FIELDS */}
           {isEditingBook && (
             <div className="edit-fields">
+              <Select
+                placeholder="Tags"
+                mode="tags"
+                onChange={(val: string[]) =>
+                  editBookInfo({
+                    tags: val.map(tag => tags.find(t => t.name === tag) || { name: tag }),
+                  })
+                }
+                value={userFields.tags?.map(tag => tag.name)}
+                options={tags.map(tag => ({ label: tag.name, value: tag.name }))}
+              />
               <Input
                 placeholder="Originally Published Year"
                 type="number"
@@ -87,7 +122,6 @@ const NewBook = ({
                 placeholder="Add a comment..."
                 value={userFields.comment}
                 onChange={e => {
-                  console.log(e.target.value);
                   editBookInfo({
                     comment: e.target.value,
                   });

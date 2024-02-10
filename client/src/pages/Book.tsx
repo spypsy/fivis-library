@@ -1,4 +1,4 @@
-import { Col, Descriptions, Image, Input, Row, Skeleton, Typography } from 'antd';
+import { Col, Descriptions, Image, Input, Row, Skeleton, Tag, Typography } from 'antd';
 import useAxios from 'axios-hooks';
 import { languages } from 'countries-list';
 import { useState } from 'react';
@@ -79,6 +79,11 @@ export const Book = () => {
                   month: 'long',
                   day: 'numeric',
                 })}
+              </Descriptions.Item>
+            )}
+            {bookData?.tags && (
+              <Descriptions.Item label="Tags">
+                {bookData?.tags?.map(tag => <Tag key={tag.name}>{tag.name}</Tag>)}
               </Descriptions.Item>
             )}
             <Descriptions.Item label="Comment">

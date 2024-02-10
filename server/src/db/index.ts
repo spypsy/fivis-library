@@ -5,6 +5,7 @@ import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
 import { BookUserEntryDao } from './models/BookUserEntry';
 import { BookLendEntryDao } from './models/LendEntry';
+import { TagDao } from './models/Tag';
 import { UserDao } from './models/User';
 
 let connectionOptions: DataSourceOptions;
@@ -20,7 +21,7 @@ connectionOptions = {
   database: 'data/sqlite.db',
   synchronize: true,
   logging: false, //true,
-  entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao],
+  entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao, TagDao],
   subscribers: [],
   migrations: [],
 };
@@ -46,6 +47,7 @@ export default class DB {
   private bookLendEntryRep: Repository<BookLendEntryDao>;
   private bookUserEntryRep: Repository<BookUserEntryDao>;
   private authorRep: Repository<AuthorDao>;
+  private tagRep: Repository<TagDao>;
   private log = (txt: string) => console.log(`\n\n${txt}\n\n`);
 
   constructor(public dataSource: DataSource) {
@@ -53,6 +55,7 @@ export default class DB {
     this.bookRep = this.dataSource.getRepository(BookDao);
     this.bookUserEntryRep = this.dataSource.getRepository(BookUserEntryDao);
     this.authorRep = this.dataSource.getRepository(AuthorDao);
+    this.tagRep = this.dataSource.getRepository(TagDao);
   }
 
   public static async init(): Promise<DB> {
@@ -88,14 +91,12 @@ export default class DB {
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
     if (existingBook) {
-      console.log('book exists: ', existingBook);
       const existingEntry = await this.bookUserEntryRep.findOne({
         where: {
           user: { id: user.id },
           book: { isbn: existingBook.isbn },
         },
       });
-      this.log(`existing entry: ${JSON.stringify(existingEntry)}`);
       if (existingEntry) {
         return AddedStatus.ALREADY_EXISTS;
       }
@@ -105,11 +106,11 @@ export default class DB {
       book = new BookDao();
       book.isbn = bookData.isbn;
       book.title = bookData.title;
-      book.subtitle = bookData.subtitle;
-      book.description = bookData.description;
+      book.subtitle = bookData.subtitle || 'N/A';
+      book.description = bookData.description || 'N/A';
       book.pageCount = bookData.pageCount;
       book.publishedDate = bookData.publishedDate;
-      book.publisher = bookData.publisher;
+      book.publisher = bookData.publisher || 'N/A';
       book.language = bookData.language?.toString();
       book.imageLink = bookData.imageLinks?.thumbnail;
     }
@@ -133,9 +134,25 @@ export default class DB {
     }
     book.authors = authorEntities;
 
+    // handle tags; create new ones & fetch existing ones
+    const appliedTags = bookData.tags;
+    const existingTags = appliedTags.filter(tag => tag.id) as TagDao[];
+    const newTags = appliedTags.filter(tag => !tag.id);
+    let tagEntities: TagDao[] = [];
+    for (const tag of newTags) {
+      const newTag = new TagDao();
+      newTag.name = tag.name;
+      tagEntities.push(newTag);
+      this.tagRep.save(newTag);
+    }
+
+    const tags = [...existingTags, ...tagEntities];
+
     // create user entry
     const userEntry = new BookUserEntryDao();
     userEntry.book = book;
+    userEntry.tags = tags;
+    userEntry.publisher = bookData.publisher;
     userEntry.user = user;
     userEntry.category = bookData.category;
     userEntry.subcategory = bookData.subcategory;
@@ -161,7 +178,6 @@ export default class DB {
 
   public async getBook(isbn: string) {
     const book = await this.bookRep.findOneBy({ isbn });
-    console.log('\n\n', book, '\n\n');
     return book;
   }
 
@@ -184,6 +200,7 @@ export default class DB {
         user: { id: userId },
         book: { isbn },
       },
+      relations: ['tags'],
     });
     return entry;
   }
@@ -191,10 +208,9 @@ export default class DB {
   public async getUserBooks(userId: string) {
     const userData = await this.userRep.findOne({
       where: { id: userId },
-      relations: { bookEntries: { book: true, user: true } },
+      relations: { bookEntries: { book: true, user: true, tags: true } },
     });
     const dbBooks = userData.bookEntries.map(({ book }) => book);
-    console.log(dbBooks);
     return dbBooks;
   }
 
@@ -225,5 +241,10 @@ export default class DB {
   public async getUserById(id: number): Promise<UserDao> {
     const user = await this.userRep.findOneBy({ id: id.toString() });
     return user;
+  }
+
+  public async getTags() {
+    const tags = await this.tagRep.find();
+    return tags;
   }
 }
