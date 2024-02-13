@@ -10,6 +10,17 @@ import { UserDao } from './models/User';
 
 let connectionOptions: DataSourceOptions;
 
+type SearchFields = {
+  any: string;
+  title: string;
+  subtitle: string;
+  tags: string;
+  authors: string;
+  publisher: string;
+  isbn: string;
+  description: string;
+};
+
 enum AddedStatus {
   ADDED,
   ALREADY_EXISTS,
@@ -210,9 +221,11 @@ export default class DB {
       where: { id: userId },
       relations: { bookEntries: { book: true, user: true, tags: true } },
     });
-    const dbBooks = userData.bookEntries.map(({ book }) => book);
-    return dbBooks;
+    const result = userData.bookEntries.map(({ book, ...entry }) => ({ ...entry, ...book }));
+    return result;
   }
+
+  public async searchBooks(userId: string, search: SearchFields) {}
 
   public async getAllBooks() {
     const books = await this.bookRep.find();

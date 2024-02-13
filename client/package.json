@@ -37,6 +37,7 @@
     "axios": "^0.27.2",
     "axios-hooks": "^3.1.5",
     "countries-list": "^2.6.1",
+    "lodash.startcase": "^4.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.3",
@@ -47,6 +48,7 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/jest": "^27.5.2",
+    "@types/lodash.startcase": "^4.4.9",
     "@types/node": "^16.11.45",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",

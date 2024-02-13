@@ -1,4 +1,4 @@
-import { BookOutlined, ScanOutlined } from '@ant-design/icons';
+import { BookOutlined, ScanOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Image, Layout, Menu, MenuProps, message } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect, useState } from 'react';
@@ -20,6 +20,11 @@ const items: MenuProps['items'] = [
     label: 'Scan Books',
     key: 'home',
     icon: <ScanOutlined />,
+  },
+  {
+    label: 'Search',
+    key: 'search',
+    icon: <SearchOutlined />,
   },
 ];
 

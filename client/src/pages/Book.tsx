@@ -19,8 +19,6 @@ export const Book = () => {
     url: `/api/books/${isbn}`,
   });
 
-  console.log(bookData);
-
   return (
     <Row>
       <Col span={4} />
@@ -37,7 +35,7 @@ export const Book = () => {
             }
           >
             <Descriptions.Item label="Authors">
-              {bookData?.authors?.map(author => <span key={author.name}>{author.name}</span>)}
+              {bookData?.authors?.map(author => author.name).join(', ')}
             </Descriptions.Item>
 
             <Descriptions.Item label="Publisher">{bookData?.publisher}</Descriptions.Item>

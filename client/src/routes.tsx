@@ -4,6 +4,7 @@ import Home from 'pages/Home';
 import Login from 'pages/Login';
 import MyBooks from 'pages/MyBooks';
 import Register from 'pages/Register';
+import SearchPage from 'pages/Search';
 import Welcome from 'pages/Welcome';
 import React from 'react';
 import { Redirect, Route, RouteProps, Switch } from 'react-router-dom';
@@ -22,6 +23,7 @@ const Routes = () => {
       </Route>
       <ProtectedRoute component={Home} path="/home" exact />
       <ProtectedRoute component={MyBooks} path="/my-books" exact />
+      <ProtectedRoute component={SearchPage} path="/search" exact />
       <ProtectedRoute component={Book} path="/book/:isbn" />
     </Switch>
   );

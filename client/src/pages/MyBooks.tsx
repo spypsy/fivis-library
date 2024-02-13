@@ -2,7 +2,7 @@ import { Table, Tag } from 'antd';
 import useAxios from 'axios-hooks';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Author, Book } from 'types';
+import { Author, Book, Tag as TagType } from 'types';
 
 const MyBooks = () => {
   const [{ data: booksData, loading }] = useAxios('/api/books/mine', { manual: false });
@@ -43,15 +43,21 @@ const MyBooks = () => {
           title="Author(s)"
           dataIndex="authors"
           key="authors"
-          render={(authors: Author[]) =>
-            authors.map(author => (
-              <Tag color="purple" key={author.name}>
-                {author.name}
-              </Tag>
-            ))
-          }
+          render={(authors: Author[]) => authors.map(author => author.name).join(', ')}
         />
         <Table.Column title="Publisher" dataIndex="publisher" key="publisher" />
+        <Table.Column
+          title="Tags"
+          dataIndex="tags"
+          key="tags"
+          render={tags => (
+            <i>
+              {(tags as TagType[]).map(({ name }) => (
+                <Tag color="purple">{name}</Tag>
+              ))}
+            </i>
+          )}
+        />
       </Table>
     </div>
   );
