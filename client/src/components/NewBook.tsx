@@ -42,6 +42,20 @@ const NewBook = ({
             <Image src={book.imageLinks.thumbnail} preview={{ src: book.imageLinks.smallThumbnail }} />
           )}
           <p>Author: {book.authors?.join(', ')}</p>
+          {(book.subtitle || isEditingBook) && (
+            <p>
+              Subtitle:{' '}
+              {isEditingBook ? (
+                <Input
+                  style={{ display: 'inline-block', width: 'auto' }}
+                  value={userFields.subtitle || book.subtitle}
+                  onChange={e => editBookInfo({ subtitle: e.target.value })}
+                />
+              ) : (
+                userFields.subtitle || book.subtitle
+              )}
+            </p>
+          )}
           {book.publishedDate && <p>Published: {book.publishedDate}</p>}
           {book.language && <p>Language: {languages[book.language].name}</p>}
           {(book.publisher || isEditingBook) &&

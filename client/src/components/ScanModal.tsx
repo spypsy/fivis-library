@@ -100,6 +100,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   return (
     <Modal
       title="Add Book"
+      className="book-scan-modal"
       visible={isOpen}
       onCancel={toggleModal}
       onOk={onSubmitUserBooks}

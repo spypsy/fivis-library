@@ -28,8 +28,8 @@ export class BookDao {
   @Column()
   publishedDate: Date;
 
-  @Column()
-  pageCount: number;
+  @Column({ nullable: true })
+  pageCount?: number;
 
   @Column()
   language: string;

@@ -145,7 +145,7 @@ export default class DB {
     book.authors = authorEntities;
 
     // handle tags; create new ones & fetch existing ones
-    const appliedTags = bookData.tags;
+    const appliedTags = bookData.tags || [];
     const existingTags = appliedTags.filter(tag => tag.id) as TagDao[];
     const newTags = appliedTags.filter(tag => !tag.id);
     let tagEntities: TagDao[] = [];

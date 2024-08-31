@@ -29,10 +29,12 @@ export type Book = {
   imageLinks: ImageLinks;
   imageLink?: string;
   language: LangEnum;
+  tags?: Tag[];
 };
 
 export type UserEntryFields = {
   publisher?: string;
+  subtitle?: string;
   comment?: string;
   originalPublishedYear?: number;
   originalLanguage?: LangEnum;

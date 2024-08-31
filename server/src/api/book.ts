@@ -1,10 +1,8 @@
 import express from 'express';
 
 import DB from '../db';
-import { UserDao } from '../db/models/User';
 import { UserAuthRequest } from '../middleware/jwt';
 import { getBookByIsbn } from '../services/book';
-import { BookData, UserEntryData } from '../services/book/types';
 
 const router = express.Router();
 
@@ -12,6 +10,7 @@ export default (db: DB) => {
   // store book
   router.post('/', async (req: UserAuthRequest, res) => {
     const { bookData } = req.body;
+    console.log('bookData', bookData);
     try {
       await db.addBook(bookData, req.user);
     } catch (err) {

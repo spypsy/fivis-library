@@ -72,7 +72,7 @@ const NavBar = () => {
   return (
     <Header className="header">
       <div className="logo">
-        <a href="/">
+        <a href="/home">
           <Image src={logo} preview={false} />
         </a>
       </div>
