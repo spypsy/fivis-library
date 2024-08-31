@@ -1,9 +1,11 @@
-import { Button, Col, Input, Row, Select } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
+import { Button, Col, Input, Row, Select, Space } from 'antd';
 import startCase from 'lodash.startcase';
-import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useState } from 'react';
 
 const { Option } = Select;
+
+// type SearchProperty = 'any' | 'title' | 'subtitle' | 'tags' | 'authors' | 'publisher' | 'isbn' | 'description';
 
 const searchProperties = ['any', 'title', 'subtitle', 'tags', 'authors', 'publisher', 'isbn', 'description'];
 
@@ -26,8 +28,14 @@ const SearchPage = () => {
     setSearchTerms(newSearchTerms);
   };
 
+  const handleRemoveSearchTerm = (index: number) => {
+    const newSearchTerms = [...searchTerms];
+    newSearchTerms.splice(index, 1);
+    setSearchTerms(newSearchTerms);
+  };
+
   const renderSearchTerm = (term: SearchTerm, index: number) => (
-    <Row gutter={16} key={index}>
+    <Row gutter={16} key={index} style={{ marginBottom: 16 }}>
       <Col span={4}>
         {index > 0 && (
           <Select value={term.operator} onChange={value => handleSearchTermChange(index - 1, 'operator', value)}>
@@ -37,18 +45,18 @@ const SearchPage = () => {
           </Select>
         )}
       </Col>
-      <Col span={8}>
+      <Col span={7}>
         <Input
           placeholder="Search..."
           value={term.value}
           onChange={e => handleSearchTermChange(index, 'value', e.target.value)}
         />
       </Col>
-      <Col span={8}>
+      <Col span={7}>
         <Select
           value={term.property}
           onChange={value => handleSearchTermChange(index, 'property', value)}
-          style={{ width: 250 }}
+          style={{ width: '100%' }}
         >
           {searchProperties.map(property => (
             <Option key={property} value={property}>
@@ -57,22 +65,36 @@ const SearchPage = () => {
           ))}
         </Select>
       </Col>
+      <Col span={2}>
+        <Button
+          icon={<CloseOutlined />}
+          onClick={() => handleRemoveSearchTerm(index)}
+          disabled={searchTerms.length === 1}
+          style={{ width: '100%' }}
+        />
+      </Col>
     </Row>
   );
 
+  const handleSearch = () => {
+    // Implement search logic here
+  };
+
   return (
-    <>
+    <Space direction="vertical" style={{ width: '100%' }}>
       {searchTerms.map(renderSearchTerm)}
-      <Button onClick={handleAddSearchTerm} style={{ marginTop: 15 }}>
-        Add Search Term
-      </Button>
-      <br />
-      <Button type="primary" style={{ marginTop: 30 }}>
-        Search
-      </Button>
-      {/* Add a search button and handle the search logic */}
-    </>
+      <Row gutter={16}>
+        <Col span={8}>
+          <Button onClick={handleAddSearchTerm}>Add Search Term</Button>
+        </Col>
+        <Col span={4}>
+          <Button type="primary" onClick={handleSearch}>
+            Search
+          </Button>
+        </Col>
+      </Row>
+    </Space>
   );
 };
 
-export default withRouter(SearchPage);
+export default SearchPage;

@@ -1,4 +1,5 @@
 {
   "liveshare.sharedTerminalWidth": 80,
-  "editor.minimap.maxColumn": 80
+  "editor.minimap.maxColumn": 80,
+  "circleci.persistedProjectSelection": []
 }

@@ -10,15 +10,14 @@ import { UserDao } from './models/User';
 
 let connectionOptions: DataSourceOptions;
 
-type SearchFields = {
-  any: string;
-  title: string;
-  subtitle: string;
-  tags: string;
-  authors: string;
-  publisher: string;
-  isbn: string;
-  description: string;
+type SearchProperty = 'any' | 'title' | 'subtitle' | 'tags' | 'authors' | 'publisher' | 'isbn' | 'description';
+
+const searchProperties = ['any', 'title', 'subtitle', 'tags', 'authors', 'publisher', 'isbn', 'description'];
+
+type SearchTerm = {
+  value: string;
+  property: SearchProperty;
+  operator: string;
 };
 
 enum AddedStatus {
@@ -225,7 +224,58 @@ export default class DB {
     return result;
   }
 
-  public async searchBooks(userId: string, search: SearchFields) {}
+  public async searchBooks(userId: string, searchTerms: SearchTerm[]) {
+    let query = this.bookUserEntryRep
+      .createQueryBuilder('user_entry')
+      .leftJoinAndSelect('user_entry.book', 'book')
+      .leftJoinAndSelect('book.authors', 'author')
+      .leftJoinAndSelect('user_entry.tags', 'tag')
+      .where('user_entry.user.id = :userId', { userId });
+
+    searchTerms.forEach((term, index) => {
+      let whereClause = '';
+      const parameter = `%${term.value}%`;
+
+      switch (term.property) {
+        case 'any':
+          whereClause = `(book.title LIKE :parameter OR book.subtitle LIKE :parameter OR book.description LIKE :parameter OR book.publisher LIKE :parameter OR book.isbn LIKE :parameter OR author.name LIKE :parameter OR tag.name LIKE :parameter)`;
+          break;
+        case 'title':
+        case 'subtitle':
+        case 'publisher':
+        case 'isbn':
+        case 'description':
+          whereClause = `book.${term.property} LIKE :parameter`;
+          break;
+        case 'tags':
+          whereClause = `tag.name LIKE :parameter`;
+          break;
+        case 'authors':
+          whereClause = `author.name LIKE :parameter`;
+          break;
+        default:
+          return; // Skip if the property is not recognized
+      }
+
+      if (index === 0) {
+        query = query.andWhere(whereClause, { parameter });
+      } else {
+        switch (term.operator) {
+          case 'and':
+            query = query.andWhere(whereClause, { parameter });
+            break;
+          case 'or':
+            query = query.orWhere(whereClause, { parameter });
+            break;
+          case 'not':
+            query = query.andWhere(`NOT (${whereClause})`, { parameter });
+            break;
+          default:
+          // Handle default case if needed
+        }
+      }
+    });
+  }
 
   public async getAllBooks() {
     const books = await this.bookRep.find();
