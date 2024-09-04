@@ -78,18 +78,32 @@ export const Book = () => {
                 </>
               }
               extra={
-                <Button
-                  type={editMode ? 'primary' : 'default'}
-                  onClick={() => {
-                    if (editMode) {
-                      onSave();
-                    } else {
-                      setEditMode(true);
-                    }
-                  }}
-                >
-                  {editMode ? 'Save' : 'Edit'}
-                </Button>
+                <>
+                  {editMode && (
+                    <Button
+                      type="default"
+                      onClick={() => {
+                        setEditMode(false);
+                        setEditData(bookData);
+                      }}
+                      style={{ marginRight: '1rem' }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  <Button
+                    type={editMode ? 'primary' : 'default'}
+                    onClick={() => {
+                      if (editMode) {
+                        onSave();
+                      } else {
+                        setEditMode(true);
+                      }
+                    }}
+                  >
+                    {editMode ? 'Save' : 'Edit'}
+                  </Button>
+                </>
               }
             >
               <Descriptions.Item label="Authors">
