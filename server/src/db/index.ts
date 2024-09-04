@@ -196,6 +196,8 @@ export default class DB {
     if (!dbBookEntry) {
       throw new Error('No book to update.');
     }
+    console.log('dbBookEntry', dbBookEntry);
+    console.log('updateData', updateData);
     const updatedBookEntry = {
       ...dbBookEntry,
       ...updateData,

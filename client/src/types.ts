@@ -40,6 +40,7 @@ export type UserEntryFields = {
   originalLanguage?: LangEnum;
   addedAt?: Date;
   tags?: Tag[];
+  rating?: number;
 };
 
 export type BookSaveData = {

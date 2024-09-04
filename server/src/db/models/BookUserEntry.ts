@@ -30,6 +30,9 @@ export class BookUserEntryDao {
   @Column({ nullable: true })
   publisher?: string;
 
+  @Column({ nullable: true })
+  subtitle?: string;
+
   @ManyToMany(() => TagDao, tag => tag.books)
   @JoinTable()
   tags?: TagDao[];
