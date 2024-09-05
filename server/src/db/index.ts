@@ -233,15 +233,7 @@ export default class DB {
       ...book,
       addedAt: new Date(entry.addedAt),
     }));
-    // DELETE GREEK BOOK
-    const greekBook = result.find(book => book.isbn === '978-960-524-542-9');
-    if (greekBook) {
-      // Remove book from DB
-      console.log('found greek book');
-      await this.bookRep.delete({ isbn: '978-960-524-542-9' });
-      // Remove book from user's entries
-      await this.bookUserEntryRep.delete({ user: { id: userId }, book: { isbn: '978-960-524-542-9' } });
-    }
+
     return result;
   }
 
