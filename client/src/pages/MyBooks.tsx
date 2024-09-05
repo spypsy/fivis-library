@@ -1,5 +1,5 @@
-import { FilterFilled, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
-import { Button, Input, InputRef, Select, Table, Tag } from 'antd';
+import { FilterFilled } from '@ant-design/icons';
+import { Button, Input, InputRef, Select, Table, Tag, Tooltip } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -188,14 +188,23 @@ const MyBooks = () => {
       title: 'Tags',
       dataIndex: 'tags',
       key: 'tags',
+      ellipsis: true,
       render: (tags: TagType[]) => (
-        <i>
+        <Tooltip
+          style={{ width: 200 }}
+          placement="topLeft"
+          title={tags.map(({ name }) => (
+            <Tag color="purple" key={name}>
+              {name}
+            </Tag>
+          ))}
+        >
           {tags.map(({ name }) => (
             <Tag color="purple" key={name}>
               {name}
             </Tag>
           ))}
-        </i>
+        </Tooltip>
       ),
       filterDropdown: () => (
         <Select
@@ -232,7 +241,7 @@ const MyBooks = () => {
         dataSource={filteredBooks}
         columns={columns}
         rowKey={({ isbn }) => isbn}
-        pagination={{ showSizeChanger: true, pageSizeOptions: ['10', '25', '50', '100'], defaultPageSize: 25 }}
+        pagination={{ showSizeChanger: true, pageSizeOptions: ['25', '50', '100', '250'], defaultPageSize: 50 }}
         onChange={handleChange}
       />
     </div>
