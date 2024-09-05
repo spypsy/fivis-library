@@ -11,6 +11,7 @@ import {
   Skeleton,
   Tag,
   Typography,
+  message,
 } from 'antd';
 import useAxios from 'axios-hooks';
 import { languages } from 'countries-list';
@@ -25,40 +26,40 @@ const { Paragraph } = Typography;
 export const Book = () => {
   const { isbn } = useParams<{ isbn: string }>();
   const [editMode, setEditMode] = useState<boolean>(false);
-  const [editData, setEditData] = useState<UserBook>();
-  const [shouldUpdate, setShouldUpdate] = useState<boolean>(false);
+  const [bookData, editBookData] = useState<UserBook>();
   const [{ data: tagsData }] = useAxios<TagType[]>('/api/tags', { useCache: false });
 
-  const [{ data: bookData, loading }, loadBook] = useAxios<UserBook>({
-    url: `/api/books/${isbn}`,
-  });
+  const [{ data: fetchBookData, loading }] = useAxios<UserBook>(
+    {
+      url: `/api/books/${isbn}`,
+    },
+    { useCache: false },
+  );
   const [{ loading: saveLoading }, saveBook] = useAxios<UserBook>(
     {
       url: `/api/books/${isbn}`,
       method: 'PUT',
-      data: { bookData: editData },
+      data: { bookData },
     },
     { manual: true },
   );
 
   useEffect(() => {
-    if (bookData && !editData) {
-      setEditData(bookData);
+    if (fetchBookData && !bookData) {
+      editBookData(fetchBookData);
     }
-  }, [bookData, editData]);
-
-  useEffect(() => {
-    if (shouldUpdate) {
-      loadBook();
-      setShouldUpdate(false);
-    }
-  }, [shouldUpdate, loadBook]);
+  }, [fetchBookData, bookData]);
 
   const onSave = async () => {
     setEditMode(false);
-    if (!isEqual(bookData, editData)) {
-      await saveBook();
-      setShouldUpdate(true);
+    if (!isEqual(fetchBookData, bookData)) {
+      const result = await saveBook();
+      if (result.status !== 200) {
+        message.error('Error saving book');
+        editBookData(fetchBookData);
+      } else {
+        message.success('Book saved');
+      }
     }
   };
 
@@ -73,8 +74,8 @@ export const Book = () => {
               column={{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }}
               title={
                 <>
-                  {bookData?.imageLink && <Image loading="eager" src={bookData.imageLink}></Image>}
-                  <span style={{ marginLeft: '1rem' }}>{bookData?.title}</span>
+                  {fetchBookData?.imageLink && <Image loading="eager" src={fetchBookData.imageLink}></Image>}
+                  <span style={{ marginLeft: '1rem' }}>{fetchBookData?.title}</span>
                 </>
               }
               extra={
@@ -84,7 +85,7 @@ export const Book = () => {
                       type="default"
                       onClick={() => {
                         setEditMode(false);
-                        setEditData(bookData);
+                        editBookData(fetchBookData);
                       }}
                       style={{ marginRight: '1rem' }}
                     >
@@ -106,6 +107,17 @@ export const Book = () => {
                 </>
               }
             >
+              <Descriptions.Item label="Subtitle">
+                {editMode ? (
+                  <Input
+                    placeholder="Subtitle"
+                    value={bookData?.subtitle}
+                    onChange={e => editBookData({ ...bookData!, subtitle: e.target.value })}
+                  />
+                ) : (
+                  bookData?.subtitle
+                )}
+              </Descriptions.Item>
               <Descriptions.Item label="Authors">
                 {bookData?.authors?.map(author => author.name).join(', ')}
               </Descriptions.Item>
@@ -113,8 +125,8 @@ export const Book = () => {
               <Descriptions.Item label="Publisher">
                 {editMode ? (
                   <Input
-                    value={editData?.publisher}
-                    onChange={e => setEditData({ ...editData!, publisher: e.target.value })}
+                    value={bookData?.publisher}
+                    onChange={e => editBookData({ ...bookData!, publisher: e.target.value })}
                   />
                 ) : (
                   bookData?.publisher
@@ -133,30 +145,22 @@ export const Book = () => {
                 {editMode ? (
                   <DatePicker
                     picker="year"
-                    onChange={e => setEditData({ ...editData!, originalPublishedYear: e?.year() })}
-                    value={editData!.originalPublishedYear! ? moment().year(editData!.originalPublishedYear) : null}
+                    onChange={e => editBookData({ ...bookData!, originalPublishedYear: e?.year() })}
+                    value={bookData!.originalPublishedYear! ? moment().year(bookData!.originalPublishedYear) : null}
                   />
                 ) : (
                   bookData?.originalPublishedYear
                 )}
               </Descriptions.Item>
-              <Descriptions.Item label="Subtitle">
-                {editMode ? (
-                  <Input
-                    placeholder="Subtitle"
-                    value={editData?.subtitle}
-                    onChange={e => setEditData({ ...editData!, subtitle: e.target.value })}
-                  />
-                ) : (
-                  editData?.subtitle
-                )}
-              </Descriptions.Item>
+
               <Descriptions.Item label="Description">
-                <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>{bookData?.description}</Paragraph>
+                <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
+                  {fetchBookData?.description}
+                </Paragraph>
               </Descriptions.Item>
               <Descriptions.Item label="Language">
                 <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                  {bookData?.language ? languages[bookData?.language].name : ''}
+                  {fetchBookData?.language ? languages[fetchBookData?.language].name : ''}
                 </Paragraph>
               </Descriptions.Item>
               <Descriptions.Item label="Original Language">
@@ -166,19 +170,19 @@ export const Book = () => {
                       value: key,
                       label: value.name,
                     }))}
-                    value={editData?.originalLanguage}
-                    onChange={val => setEditData({ ...editData!, originalLanguage: val })}
+                    value={bookData?.originalLanguage}
+                    onChange={val => editBookData({ ...bookData!, originalLanguage: val })}
                     style={{ width: '100%' }}
                   />
                 ) : (
                   <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                    {bookData?.originalLanguage ? languages[bookData?.originalLanguage].name : ''}
+                    {bookData?.originalLanguage ? languages[bookData.originalLanguage].name : ''}
                   </Paragraph>
                 )}
               </Descriptions.Item>
-              {bookData?.addedAt && (
+              {fetchBookData?.addedAt && (
                 <Descriptions.Item label="Added At">
-                  {new Date(bookData?.addedAt).toLocaleDateString('en-gb', {
+                  {new Date(fetchBookData?.addedAt).toLocaleDateString('en-gb', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -188,17 +192,22 @@ export const Book = () => {
               <Descriptions.Item label="Tags">
                 {editMode ? (
                   <Select
-                    options={tagsData?.map(tag => ({ label: tag.name, value: tag.name }))}
                     mode="tags"
                     onChange={val =>
-                      setEditData({
-                        ...editData!,
+                      editBookData({
+                        ...bookData!,
                         tags: val.map(tag => tagsData?.find(t => t.name === tag) || { name: tag }),
                       })
                     }
                     style={{ width: '100%' }}
-                    value={editData?.tags?.map(tag => tag.name)}
-                  />
+                    value={bookData?.tags?.map(tag => tag.name)}
+                  >
+                    {tagsData?.map(tag => (
+                      <Select.Option key={`${tag.name}.${tag.id}`} value={tag.name}>
+                        {tag.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
                 ) : (
                   bookData?.tags?.map(tag => <Tag key={tag.name}>{tag.name}</Tag>)
                 )}
@@ -207,8 +216,8 @@ export const Book = () => {
                 {editMode ? (
                   <Input.TextArea
                     rows={4}
-                    value={editData?.comment}
-                    onChange={e => setEditData({ ...editData!, comment: e.target.value })}
+                    value={bookData?.comment}
+                    onChange={e => editBookData({ ...bookData!, comment: e.target.value })}
                   />
                 ) : (
                   <p className="comment-value">{bookData?.comment}</p>
@@ -217,9 +226,9 @@ export const Book = () => {
               <Descriptions.Item label="Rating">
                 <Rate
                   allowHalf
-                  value={editData?.rating}
+                  value={bookData?.rating}
                   disabled={!editMode}
-                  onChange={rating => setEditData({ ...editData!, rating })}
+                  onChange={rating => editBookData({ ...bookData!, rating })}
                 />
               </Descriptions.Item>
             </Descriptions>

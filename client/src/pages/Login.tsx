@@ -38,6 +38,12 @@ const Login = ({ history }: RouteComponentProps) => {
   return (
     <div className="page login">
       <Row>
+        <Col span={8} />
+        <Col span={8}>
+          <h2>Login</h2>
+        </Col>
+      </Row>
+      <Row>
         <Col span={24}>
           <Form
             name="basic"

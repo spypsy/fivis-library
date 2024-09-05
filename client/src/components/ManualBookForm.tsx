@@ -1,5 +1,6 @@
 import { Button, Col, DatePicker, Form, FormInstance, Input, InputNumber, Row, Select } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
+import { languages } from 'countries-list';
 import { Tag, UserBook } from 'types';
 
 const ManualBookForm = ({
@@ -62,7 +63,16 @@ const ManualBookForm = ({
         <InputNumber min={1} />
       </Form.Item>
       <Form.Item name="language" label="Language" rules={[{ required: true }]}>
-        <Input />
+        <Select
+          showSearch
+          options={Object.entries(languages).map(([key, value]) => ({ value: key, label: value.name }))}
+          filterOption={(value, option) => {
+            if (!option) {
+              return false;
+            }
+            return option.label.toLowerCase().startsWith(value.toLowerCase());
+          }}
+        />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={addingBook}>

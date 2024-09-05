@@ -1,6 +1,6 @@
 import { DataSource, DataSourceOptions, Repository } from 'typeorm';
 
-import { BookData, UserEntryData } from '../services/book/types';
+import { BookData, Tag, UserEntryData } from '../services/book/types';
 import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
 import { BookUserEntryDao } from './models/BookUserEntry';
@@ -96,6 +96,20 @@ export default class DB {
     return { booksAdded, duplicates };
   }
 
+  public async deduplicateTags() {
+    const allTags = await this.tagRep.find();
+    const tagsToDelete: TagDao[] = [];
+    const tagsToKeep: TagDao[] = [];
+    allTags.forEach(tag => {
+      if (tagsToKeep.some(t => t.name === tag.name)) {
+        tagsToDelete.push(tag);
+      } else {
+        tagsToKeep.push(tag);
+      }
+    });
+    await this.tagRep.remove(tagsToDelete);
+  }
+
   public async addBook(bookData: BookData & UserEntryData, user: UserDao) {
     let book: BookDao;
     // check if book already exists
@@ -144,19 +158,7 @@ export default class DB {
     }
     book.authors = authorEntities;
 
-    // handle tags; create new ones & fetch existing ones
-    const appliedTags = bookData.tags || [];
-    const existingTags = appliedTags.filter(tag => tag.id) as TagDao[];
-    const newTags = appliedTags.filter(tag => !tag.id);
-    let tagEntities: TagDao[] = [];
-    for (const tag of newTags) {
-      const newTag = new TagDao();
-      newTag.name = tag.name;
-      tagEntities.push(newTag);
-      this.tagRep.save(newTag);
-    }
-
-    const tags = [...existingTags, ...tagEntities];
+    const tags = await this.handleTags(bookData.tags);
 
     // create user entry
     const userEntry = new BookUserEntryDao();
@@ -191,13 +193,17 @@ export default class DB {
     return book;
   }
 
-  public async updateBook(userId: string, isbn: string, updateData: Partial<BookDao>) {
+  public async updateBook(userId: string, isbn: string, updateData: Partial<BookUserEntryDao>) {
     const dbBookEntry = await this.getBookEntry(userId, isbn);
     if (!dbBookEntry) {
       throw new Error('No book to update.');
     }
-    console.log('dbBookEntry', dbBookEntry);
-    console.log('updateData', updateData);
+
+    if (updateData.tags) {
+      const tags = await this.handleTags(updateData.tags);
+      updateData.tags = tags;
+    }
+
     const updatedBookEntry = {
       ...dbBookEntry,
       ...updateData,
@@ -222,7 +228,20 @@ export default class DB {
       where: { id: userId },
       relations: { bookEntries: { book: true, user: true, tags: true } },
     });
-    const result = userData.bookEntries.map(({ book, ...entry }) => ({ ...entry, ...book }));
+    const result = userData.bookEntries.map(({ book, ...entry }) => ({
+      ...entry,
+      ...book,
+      addedAt: new Date(entry.addedAt),
+    }));
+    // DELETE GREEK BOOK
+    const greekBook = result.find(book => book.isbn === '978-960-524-542-9');
+    if (greekBook) {
+      // Remove book from DB
+      console.log('found greek book');
+      await this.bookRep.delete({ isbn: '978-960-524-542-9' });
+      // Remove book from user's entries
+      await this.bookUserEntryRep.delete({ user: { id: userId }, book: { isbn: '978-960-524-542-9' } });
+    }
     return result;
   }
 
@@ -310,6 +329,31 @@ export default class DB {
 
   public async getTags() {
     const tags = await this.tagRep.find();
+    return tags;
+  }
+
+  private async handleTags(bookDataTags: Tag[]) {
+    // handle tags; create new ones & fetch existing ones
+    const appliedTags = bookDataTags || [];
+    const existingTags: TagDao[] = []; //= appliedTags.filter(tag => tag.id) as TagDao[];
+    let newTags = [];
+    for (const tag of appliedTags) {
+      const dbTag = await this.tagRep.findOneBy({ name: tag.name });
+      if (!dbTag) {
+        newTags.push(tag);
+      } else {
+        existingTags.push(dbTag);
+      }
+    }
+    let tagEntities: TagDao[] = [];
+    for (const tag of newTags) {
+      const newTag = new TagDao();
+      newTag.name = tag.name;
+      const dbTag = await this.tagRep.save(newTag);
+      tagEntities.push(dbTag);
+    }
+
+    const tags = [...existingTags, ...tagEntities];
     return tags;
   }
 }

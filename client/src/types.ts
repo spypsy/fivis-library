@@ -38,7 +38,7 @@ export type UserEntryFields = {
   comment?: string;
   originalPublishedYear?: number;
   originalLanguage?: LangEnum;
-  addedAt?: Date;
+  addedAt?: string;
   tags?: Tag[];
   rating?: number;
 };

@@ -36,6 +36,12 @@ const Register = ({ history }: RouteComponentProps) => {
   return (
     <div className="page register">
       <Row>
+        <Col span={8} />
+        <Col span={8}>
+          <h2>Sign Up</h2>
+        </Col>
+      </Row>
+      <Row>
         <Col span={24}>
           <Form
             name="basic"

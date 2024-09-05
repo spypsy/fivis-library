@@ -18,7 +18,7 @@ const emptyFilters = {
 };
 
 const MyBooks = () => {
-  const [{ data: booksData, loading }] = useAxios('/api/books/mine', { manual: false, useCache: false });
+  const [{ data: booksData, loading }] = useAxios<UserBook[]>('/api/books/mine', { manual: false, useCache: false });
   const [{ data: tagsData }] = useAxios<TagType[]>('/api/tags', { useCache: false });
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [filters, setFilters] = useState(emptyFilters);
@@ -207,6 +207,14 @@ const MyBooks = () => {
         />
       ),
       filterIcon: () => <FilterFilled style={{ color: filters.tags?.length ? primaryColor : undefined }} />,
+    },
+    {
+      title: 'Date Added',
+      dataIndex: 'addedAt',
+      key: 'addedAt',
+      render: (dateAdded: string) => <span>{new Date(dateAdded).toLocaleDateString()}</span>,
+      sorter: (a: UserBook, b: UserBook) => new Date(a.addedAt!)!.getTime() - new Date(b.addedAt!)!.getTime(),
+      sortOrder: sortedInfo.columnKey === 'addedAt' && sortedInfo.order,
     },
   ];
 
