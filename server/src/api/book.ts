@@ -40,11 +40,9 @@ export default (db: DB) => {
   router.get('/search-external/:isbn', async (req, res) => {
     const isbn = req.params.isbn;
     let bookData;
-    let title = '';
 
     try {
       bookData = await getBookByIsbn(isbn);
-      title = bookData.title;
     } catch (err) {
       res.status(400).send(`Error fetching ISBN: ${isbn}. Message: ${err.message}`);
     }
