@@ -1,5 +1,7 @@
-import { FilterFilled } from '@ant-design/icons';
-import { Button, Input, InputRef, Select, Table, Tag, Tooltip } from 'antd';
+import { DeleteOutlined, FilterFilled } from '@ant-design/icons';
+import { Button, Checkbox, Input, InputRef, Select, Table, Tag, Tooltip, message } from 'antd';
+import { ColumnProps } from 'antd/lib/table';
+import axios from 'axios';
 import useAxios from 'axios-hooks';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -24,6 +26,7 @@ const MyBooks = () => {
   const [filters, setFilters] = useState(emptyFilters);
   const [sortedInfo, setSortedInfo] = useState<any>({});
   const [searchInputRefs, setSearchInputRefs] = useState<Record<string, React.RefObject<InputRef>>>({});
+  const [showDeleteColumn, setShowDeleteColumn] = useState(false);
 
   useEffect(() => {
     const refs: Record<string, React.RefObject<InputRef>> = {};
@@ -84,7 +87,23 @@ const MyBooks = () => {
     setSortedInfo({});
   };
 
-  const columns = [
+  const handleDelete = async (isbn: string | undefined) => {
+    if (!isbn) {
+      message.error('Book not found');
+      return;
+    }
+    try {
+      await axios.delete(`/api/books/${isbn}`);
+      message.success('Book deleted successfully');
+      // Refresh the book list
+      const { data } = await axios.get('/api/books/mine');
+      setFilteredBooks(data);
+    } catch (error) {
+      message.error('Failed to delete book');
+    }
+  };
+
+  const columns: ColumnProps<UserBook>[] = [
     {
       title: 'Title',
       dataIndex: 'title',
@@ -227,13 +246,28 @@ const MyBooks = () => {
     },
   ];
 
+  if (showDeleteColumn) {
+    columns.push({
+      title: 'Delete',
+      key: 'delete',
+      render: (_: string | undefined, record: UserBook) => (
+        <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record?.isbn)} danger />
+      ),
+    });
+  }
+
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
         <Button onClick={clearFilters} style={{ marginRight: 8 }}>
           Clear Filters
         </Button>
-        <Button onClick={clearSorting}>Clear Sorting</Button>
+        <Button onClick={clearSorting} style={{ marginRight: 8 }}>
+          Clear Sorting
+        </Button>
+        <Checkbox checked={showDeleteColumn} onChange={e => setShowDeleteColumn(e.target.checked)}>
+          Show Delete Column
+        </Checkbox>
       </div>
       Total: {booksData?.length}
       <Table

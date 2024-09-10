@@ -18,12 +18,13 @@ import { languages } from 'countries-list';
 import isEqual from 'lodash.isequal';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Tag as TagType, UserBook } from 'types';
 
 const { Paragraph } = Typography;
 
 export const Book = () => {
+  const history = useHistory();
   const { isbn } = useParams<{ isbn: string }>();
   const [editMode, setEditMode] = useState<boolean>(false);
   const [bookData, editBookData] = useState<UserBook>();
@@ -40,6 +41,14 @@ export const Book = () => {
       url: `/api/books/${isbn}`,
       method: 'PUT',
       data: { bookData },
+    },
+    { manual: true },
+  );
+  const [, deleteBook] = useAxios(
+    {
+      url: `/api/books/${isbn}`,
+      method: 'DELETE',
+      data: { isbn },
     },
     { manual: true },
   );
@@ -63,6 +72,16 @@ export const Book = () => {
     }
   };
 
+  const onDelete = async () => {
+    const result = await deleteBook();
+    if (result.status !== 200) {
+      message.error('Error deleting book');
+    } else {
+      history.push('/my-books');
+      message.success('Book deleted');
+    }
+  };
+
   return (
     <>
       <Row>
@@ -81,16 +100,28 @@ export const Book = () => {
               extra={
                 <>
                   {editMode && (
-                    <Button
-                      type="default"
-                      onClick={() => {
-                        setEditMode(false);
-                        editBookData(fetchBookData);
-                      }}
-                      style={{ marginRight: '1rem' }}
-                    >
-                      Cancel
-                    </Button>
+                    <>
+                      <Button
+                        danger
+                        type="default"
+                        onClick={() => {
+                          onDelete();
+                        }}
+                        style={{ marginRight: '1rem' }}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        type="default"
+                        onClick={() => {
+                          setEditMode(false);
+                          editBookData(fetchBookData);
+                        }}
+                        style={{ marginRight: '1rem' }}
+                      >
+                        Cancel
+                      </Button>
+                    </>
                   )}
                   <Button
                     type={editMode ? 'primary' : 'default'}
@@ -166,13 +197,22 @@ export const Book = () => {
               <Descriptions.Item label="Original Language">
                 {editMode ? (
                   <Select
-                    options={Object.entries(languages).map(([key, value]) => ({
-                      value: key,
-                      label: value.name,
-                    }))}
+                    showSearch
+                    options={Object.entries(languages)
+                      .sort((a, b) => a[1].name.localeCompare(b[1].name))
+                      .map(([key, value]) => ({
+                        value: key,
+                        label: value.name,
+                      }))}
                     value={bookData?.originalLanguage}
                     onChange={val => editBookData({ ...bookData!, originalLanguage: val })}
                     style={{ width: '100%' }}
+                    filterOption={(value, option) => {
+                      if (!option) {
+                        return false;
+                      }
+                      return option.label.toLowerCase().startsWith(value.toLowerCase());
+                    }}
                   />
                 ) : (
                   <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>

@@ -1,12 +1,11 @@
-import { Button, Col, Collapse, DatePicker, Form, Input, InputNumber, Row, Select, Spin } from 'antd';
+import { Button, Col, Collapse, Form, Row, Spin, message } from 'antd';
 import useAxios from 'axios-hooks';
 import ManualBookForm from 'components/ManualBookForm';
 import ScanModal from 'components/ScanModal';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Book, Tag, User, UserBook } from 'types';
 
 const { Panel } = Collapse;
-const { TextArea } = Input;
 
 const Home = () => {
   const [{ data: userData, loading }] = useAxios('/api/user/info', { manual: false });
@@ -15,7 +14,7 @@ const Home = () => {
   const [form] = Form.useForm();
   const [{ loading: addingBook }, executeAddBook] = useAxios({ url: '/api/books', method: 'POST' }, { manual: true });
 
-  const onFinish = async (values: Partial<Book>) => {
+  const onFinish = async (values: Partial<UserBook>) => {
     try {
       // If you need to convert the year string to a Date object
       if (values.publishedDate) {
@@ -24,12 +23,16 @@ const Home = () => {
       if (values.tags) {
         values.tags = values.tags.map(tag => ({ name: tag as any as string }));
       }
+      if (values.originalPublishedYear) {
+        values.originalPublishedYear = new Date(values.originalPublishedYear).getFullYear();
+      }
       await executeAddBook({ data: { bookData: { ...values } } });
-      form.resetFields();
+      // form.resetFields();
+      message.success('Book added successfully');
       // Optionally, show a success message or update the book list
     } catch (error) {
       console.error('Failed to add book:', error);
-      // Optionally, show an error message
+      message.error('Failed to add book');
     }
   };
 

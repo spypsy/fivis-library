@@ -3,6 +3,7 @@ import express from 'express';
 import DB from '../db';
 import { UserAuthRequest } from '../middleware/jwt';
 import { getBookByIsbn } from '../services/book';
+import { prepareUserBook } from './util';
 
 const router = express.Router();
 
@@ -10,7 +11,6 @@ export default (db: DB) => {
   // store book
   router.post('/', async (req: UserAuthRequest, res) => {
     const { bookData } = req.body;
-    console.log('bookData', bookData);
     try {
       await db.addBook(bookData, req.user);
     } catch (err) {
@@ -66,18 +66,22 @@ export default (db: DB) => {
     const book = await db.getBook(isbn);
     const bookEntry = await db.getBookEntry(req.user.id, isbn);
 
-    res.send({
-      ...book,
-      ...bookEntry,
-    });
+    res.send(prepareUserBook(book, bookEntry));
   });
 
   router.put('/:isbn', async (req: UserAuthRequest, res) => {
     const { isbn } = req.params;
     const { bookData } = req.body;
-    const userId = (req.user || { username: 'fivi', id: '1' }).id;
+    const userId = req.user.id;
     await db.updateBook(userId, isbn, bookData);
 
+    res.send().status(200);
+  });
+
+  router.delete('/:isbn', async (req: UserAuthRequest, res) => {
+    const { isbn } = req.params;
+    const userId = req.user.id;
+    await db.deleteBookEntry(userId, isbn);
     res.send().status(200);
   });
 

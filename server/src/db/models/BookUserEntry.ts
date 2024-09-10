@@ -33,7 +33,7 @@ export class BookUserEntryDao {
   @Column({ nullable: true })
   subtitle?: string;
 
-  @ManyToMany(() => TagDao, tag => tag.books)
+  @ManyToMany(() => TagDao, tag => tag.books, { cascade: true, onDelete: 'CASCADE' })
   @JoinTable()
   tags?: TagDao[];
 
@@ -61,7 +61,7 @@ export class BookUserEntryDao {
   @Column('text', { nullable: true })
   location?: string; // TODO: decide on format later
 
-  @OneToMany(() => BookLendEntryDao, le => le.userEntry, { nullable: true })
+  @OneToMany(() => BookLendEntryDao, le => le.userEntry, { nullable: true, cascade: true, onDelete: 'CASCADE' })
   lendEntries?: BookLendEntryDao[];
 
   @Column({ nullable: true })

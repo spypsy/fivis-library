@@ -1,5 +1,6 @@
 import { DataSource, DataSourceOptions, Repository } from 'typeorm';
 
+import { prepareUserBook } from '../api/util';
 import { BookData, Tag, UserEntryData } from '../services/book/types';
 import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
@@ -229,9 +230,7 @@ export default class DB {
       relations: { bookEntries: { book: true, user: true, tags: true } },
     });
     const result = userData.bookEntries.map(({ book, ...entry }) => ({
-      ...entry,
-      ...book,
-      addedAt: new Date(entry.addedAt),
+      ...prepareUserBook(book, entry),
     }));
 
     return result;
@@ -288,6 +287,24 @@ export default class DB {
         }
       }
     });
+  }
+
+  public async deleteBookEntry(userId: string, isbn: string) {
+    const bookEntry = await this.getBookEntry(userId, isbn);
+    if (!bookEntry) {
+      throw new Error('No book to delete.');
+    }
+
+    // Remove related tags (many-to-many relationship)
+    bookEntry.tags = [];
+
+    // Remove related lend entries (one-to-many relationship)
+    if (bookEntry.lendEntries) {
+      await this.bookLendEntryRep.remove(bookEntry.lendEntries);
+    }
+
+    // Remove the book entry
+    await this.bookUserEntryRep.remove(bookEntry);
   }
 
   public async getAllBooks() {
