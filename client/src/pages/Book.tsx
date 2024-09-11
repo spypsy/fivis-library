@@ -15,11 +15,12 @@ import {
 } from 'antd';
 import useAxios from 'axios-hooks';
 import { languages } from 'countries-list';
+import { useTags } from 'hooks/useTags';
 import isEqual from 'lodash.isequal';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Tag as TagType, UserBook } from 'types';
+import { UserBook } from 'types';
 
 const { Paragraph } = Typography;
 
@@ -28,7 +29,7 @@ export const Book = () => {
   const { isbn } = useParams<{ isbn: string }>();
   const [editMode, setEditMode] = useState<boolean>(false);
   const [bookData, editBookData] = useState<UserBook>();
-  const [{ data: tagsData }] = useAxios<TagType[]>('/api/tags', { useCache: false });
+  const { tags: tagsData } = useTags();
 
   const [{ data: fetchBookData, loading }] = useAxios<UserBook>(
     {

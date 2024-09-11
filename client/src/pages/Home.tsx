@@ -1,9 +1,12 @@
 import { Button, Col, Collapse, Form, Row, Spin, message } from 'antd';
+import { AxiosError } from 'axios';
 import useAxios from 'axios-hooks';
 import ManualBookForm from 'components/ManualBookForm';
 import ScanModal from 'components/ScanModal';
+import { useTags } from 'hooks/useTags';
 import { useState } from 'react';
-import { Book, Tag, User, UserBook } from 'types';
+import { Link } from 'react-router-dom';
+import { Tag, User, UserBook } from 'types';
 
 const { Panel } = Collapse;
 
@@ -13,6 +16,7 @@ const Home = () => {
   const toggleModal = () => setShowModal(state => !state);
   const [form] = Form.useForm();
   const [{ loading: addingBook }, executeAddBook] = useAxios({ url: '/api/books', method: 'POST' }, { manual: true });
+  const { tags: tagsData, loading: tagsLoading } = useTags();
 
   const onFinish = async (values: Partial<UserBook>) => {
     try {
@@ -26,17 +30,23 @@ const Home = () => {
       if (values.originalPublishedYear) {
         values.originalPublishedYear = new Date(values.originalPublishedYear).getFullYear();
       }
-      await executeAddBook({ data: { bookData: { ...values } } });
-      // form.resetFields();
-      message.success('Book added successfully');
+      await executeAddBook({ data: { bookData: { ...values }, manual: true } });
+      form.resetFields();
+      message.success(
+        <>
+          <p>Book added successfully</p>
+          <p>
+            Go <Link to={`/book/${values.isbn}`}>here</Link> to see it
+          </p>
+        </>,
+      );
       // Optionally, show a success message or update the book list
     } catch (error) {
       console.error('Failed to add book:', error);
-      message.error('Failed to add book');
+      message.error(`${(error as AxiosError).response?.data || (error as Error).message || 'Unknown error'}`);
     }
   };
 
-  const [{ data: tagsData, loading: tagsLoading }] = useAxios('/api/tags');
   const tags: Tag[] = tagsData || [];
 
   if (loading || tagsLoading) {

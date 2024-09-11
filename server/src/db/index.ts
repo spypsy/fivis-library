@@ -87,7 +87,7 @@ export default class DB {
     let duplicates: string[] = [];
     for (let i = 0; i < booksData.length; i++) {
       const { bookData } = booksData[i];
-      const wasAdded = await this.addBook(bookData, user);
+      const wasAdded = await this.addBook(bookData, false, user);
       if (wasAdded === AddedStatus.ADDED) {
         booksAdded++;
       } else if (wasAdded === AddedStatus.ALREADY_EXISTS) {
@@ -111,10 +111,23 @@ export default class DB {
     await this.tagRep.remove(tagsToDelete);
   }
 
-  public async addBook(bookData: BookData & UserEntryData, user: UserDao) {
+  public async addBook(bookData: BookData & UserEntryData, isManual: boolean, user: UserDao) {
     let book: BookDao;
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
+
+    if (isManual) {
+      if (existingBook) {
+        throw new Error(`ISBN already exists for book: ${existingBook.title}`);
+      } else if (!bookData.isbn) {
+        let randomIsbn = '';
+        for (let i = 0; i < 10; i++) {
+          randomIsbn += Math.floor(Math.random() * 10);
+        }
+        bookData.isbn = randomIsbn;
+      }
+    }
+
     if (existingBook) {
       const existingEntry = await this.bookUserEntryRep.findOne({
         where: {
@@ -153,8 +166,6 @@ export default class DB {
           author.name = authorName;
         }
         authorEntities.push(author);
-        this.log(`author: ${JSON.stringify(author)}`);
-        this.log(`author.books: ${JSON.stringify(author.books)}`);
       }
     }
     book.authors = authorEntities;

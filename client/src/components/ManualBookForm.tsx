@@ -62,7 +62,7 @@ const ManualBookForm = ({
           </Form.Item>
         </Col>
       </Row>
-      <Form.Item name="isbn" label="ISBN" rules={[{ required: true }]}>
+      <Form.Item name="isbn" label="ISBN">
         <Input />
       </Form.Item>
       <Form.Item name="pageCount" label="Page Count">

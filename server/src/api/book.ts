@@ -10,9 +10,9 @@ const router = express.Router();
 export default (db: DB) => {
   // store book
   router.post('/', async (req: UserAuthRequest, res) => {
-    const { bookData } = req.body;
+    const { bookData, manual } = req.body;
     try {
-      await db.addBook(bookData, req.user);
+      await db.addBook(bookData, !!manual, req.user);
     } catch (err) {
       return res.status(400).send(`Error storing book: ${err.message}`);
     }
