@@ -62,12 +62,18 @@ const ManualBookForm = ({
           </Form.Item>
         </Col>
       </Row>
-      <Form.Item name="isbn" label="ISBN">
-        <Input />
-      </Form.Item>
-      <Form.Item name="pageCount" label="Page Count">
-        <InputNumber min={1} />
-      </Form.Item>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item name="isbn" label="ISBN">
+            <Input />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item name="pageCount" label="Page Count">
+            <InputNumber min={1} />
+          </Form.Item>
+        </Col>
+      </Row>
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item name="language" label="Language" rules={[{ required: true }]}>
