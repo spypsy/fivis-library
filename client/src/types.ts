@@ -46,6 +46,7 @@ export type UserEntryFields = {
 export type BookSaveData = {
   booksAdded: number;
   duplicates: string[];
+  errors: string[];
 };
 
 export type Author = {

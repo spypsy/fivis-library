@@ -12,12 +12,11 @@ export default (db: DB) => {
   router.post('/', async (req: UserAuthRequest, res) => {
     const { bookData, manual } = req.body;
     try {
-      await db.addBook(bookData, !!manual, req.user);
+      const result = await db.addBook(bookData, !!manual, req.user);
+      res.send(result);
     } catch (err) {
       return res.status(400).send(`Error storing book: ${err.message}`);
     }
-
-    res.send(bookData);
   });
 
   router.post('/multi', async (req: UserAuthRequest, res) => {

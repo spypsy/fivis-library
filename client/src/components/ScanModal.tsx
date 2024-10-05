@@ -35,6 +35,25 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
         </div>,
       );
     }
+    if (!!bookSaveData?.errors?.length) {
+      message.error({
+        key: 'book-save-error',
+        content: (
+          <div>
+            Some books were not added.
+            <List size="small">
+              {bookSaveData.errors.map((error, index) => (
+                <List.Item key={index}>{error}</List.Item>
+              ))}
+            </List>
+          </div>
+        ),
+        duration: 0,
+        onClick: () => {
+          message.destroy('book-save-error');
+        },
+      });
+    }
     if (!!bookSaveData?.booksAdded) {
       setJustSearched(false);
       setBooks([]);
@@ -105,7 +124,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
       onCancel={toggleModal}
       onOk={onSubmitUserBooks}
       okText="Submit"
-      okButtonProps={{ disabled: !books.length }}
+      // okButtonProps={{ disabled: !books.length }}
       confirmLoading={bookSaveLoading}
     >
       <div onClick={() => isOpen && !isEditingBook && isbnInput?.current?.focus()}>

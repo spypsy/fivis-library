@@ -85,16 +85,20 @@ export default class DB {
     let booksAdded = 0;
     // ISBNs of books that already exist in DB
     let duplicates: string[] = [];
+    // Error strings
+    let errors: string[] = [];
     for (let i = 0; i < booksData.length; i++) {
       const { bookData } = booksData[i];
-      const wasAdded = await this.addBook(bookData, false, user);
+      const [wasAdded, error] = await this.addBook(bookData, false, user);
       if (wasAdded === AddedStatus.ADDED) {
         booksAdded++;
       } else if (wasAdded === AddedStatus.ALREADY_EXISTS) {
         duplicates.push(bookData.isbn);
+      } else if (wasAdded === AddedStatus.ERROR) {
+        errors.push(error);
       }
     }
-    return { booksAdded, duplicates };
+    return { booksAdded, duplicates, errors };
   }
 
   public async deduplicateTags() {
@@ -111,7 +115,11 @@ export default class DB {
     await this.tagRep.remove(tagsToDelete);
   }
 
-  public async addBook(bookData: BookData & UserEntryData, isManual: boolean, user: UserDao) {
+  public async addBook(
+    bookData: BookData & UserEntryData,
+    isManual: boolean,
+    user: UserDao,
+  ): Promise<[AddedStatus, string]> {
     let book: BookDao;
     // check if book already exists
     const existingBook = await this.getBook(bookData.isbn);
@@ -136,11 +144,33 @@ export default class DB {
         },
       });
       if (existingEntry) {
-        return AddedStatus.ALREADY_EXISTS;
+        return [AddedStatus.ALREADY_EXISTS, ''];
       }
 
       book = existingBook;
     } else {
+      console.log('bookData', bookData);
+      if (!bookData.isbn) {
+        return [AddedStatus.ERROR, `${bookData.title}: no ISBN.`];
+      }
+
+      if (!bookData.authors?.length) {
+        return [AddedStatus.ERROR, `${bookData.title}: no authors.`];
+      }
+
+      if (!bookData.title) {
+        return [AddedStatus.ERROR, `${bookData.title}: no title.`];
+      }
+
+      if (!bookData.publishedDate) {
+        return [AddedStatus.ERROR, `${bookData.title}: no published date.`];
+      }
+
+      if (!bookData.language) {
+        return [AddedStatus.ERROR, `${bookData.title}: no language.`];
+      }
+
+      book = new BookDao();
       book = new BookDao();
       book.isbn = bookData.isbn;
       book.title = bookData.title;
@@ -195,9 +225,10 @@ export default class DB {
       await this.bookUserEntryRep.save(userEntry);
     } catch (err) {
       console.log('err', err);
-      return AddedStatus.ERROR;
+      return [AddedStatus.ERROR, ''];
     }
-    return AddedStatus.ADDED;
+
+    return [AddedStatus.ADDED, ''];
   }
 
   public async getBook(isbn: string) {
