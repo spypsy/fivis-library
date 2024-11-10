@@ -15,8 +15,6 @@ export async function getBookByIsbn(isbn: string): Promise<BookData> {
 
   const result = await axios.get<ResponseData>(`${GOOGLE_BOOKS_API_BASE + GOOGLE_BOOKS_API_BOOK}?q=isbn:${isbn}`);
 
-  console.log('result', result.data);
-
   if (result.data.totalItems === 0 || !result?.data?.items[0]?.volumeInfo) {
     throw Error('Not Found');
   }
