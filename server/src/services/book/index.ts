@@ -6,7 +6,6 @@ const GOOGLE_BOOKS_API_BASE = 'https://www.googleapis.com';
 const GOOGLE_BOOKS_API_BOOK = '/books/v1/volumes';
 
 export async function getBookByIsbn(isbn: string): Promise<BookData> {
-  debugger;
   const digitsOnlyRegex = /^[0-9]*$/;
   const match = isbn.match(digitsOnlyRegex);
 
@@ -16,8 +15,9 @@ export async function getBookByIsbn(isbn: string): Promise<BookData> {
 
   const result = await axios.get<ResponseData>(`${GOOGLE_BOOKS_API_BASE + GOOGLE_BOOKS_API_BOOK}?q=isbn:${isbn}`);
 
-  if (!result?.data?.items[0]?.volumeInfo) {
-    throw Error('Not Found');
+  console.log('result', result.data);
+
+  if (result.data.totalItems === 0 || !result?.data?.items[0]?.volumeInfo) {
   }
 
   const responseBookData = result?.data?.items[0]?.volumeInfo;

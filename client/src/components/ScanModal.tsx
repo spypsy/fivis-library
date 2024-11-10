@@ -15,11 +15,21 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
   const [isEditingBook, setEditingBook] = useState<boolean>(false);
   const [justSearched, setJustSearched] = useState<boolean>(false);
 
-  const [{ data: bookData, loading: bookLoading }, postBarcode] = useAxios<Book>({}, { manual: true, useCache: false });
+  const [{ data: bookData, loading: bookLoading, error: scanError }, postBarcode] = useAxios<Book>(
+    {},
+    { manual: true, useCache: false },
+  );
 
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] = useAxios<BookSaveData>({}, { manual: true });
 
   const [{ data: tagsData, loading: tagsLoading }] = useAxios<Tag[]>('/api/tags', { useCache: false });
+
+  useEffect(() => {
+    if (scanError) {
+      console.log(scanError);
+      message.error(scanError.response?.data || `Error scanning book: ${scanError.message}`);
+    }
+  }, [scanError]);
 
   useEffect(() => {
     if (!!bookSaveData?.duplicates?.length) {
