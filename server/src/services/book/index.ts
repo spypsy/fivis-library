@@ -18,9 +18,10 @@ export async function getBookByIsbn(isbn: string): Promise<BookData> {
   console.log('result', result.data);
 
   if (result.data.totalItems === 0 || !result?.data?.items[0]?.volumeInfo) {
+    throw Error('Not Found');
   }
 
-  const responseBookData = result?.data?.items[0]?.volumeInfo;
+  const responseBookData = result?.data?.items?.[0]?.volumeInfo;
   return {
     id: result?.data?.items[0]?.id,
     isbn:
