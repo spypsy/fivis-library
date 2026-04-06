@@ -4,8 +4,10 @@
 
 .header {
   height: 66px;
-  // padding-left: 0;
   background-color: @primary-color;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
 
   ul {
     border-bottom: none;
@@ -21,8 +23,7 @@
   }
 
   .logo {
-    float: left;
-    width: 300px;
+    flex-shrink: 0;
     background-color: @primary-color;
     padding-right: 20px;
     img {
@@ -30,13 +31,23 @@
     }
   }
 
-  .nav-menu {
-    margin-left: 100px;
+  .desktop-menu {
+    display: flex;
   }
+
+  .nav-menu {
+    flex: 1;
+    min-width: 0;
+  }
+
   .sign-out-wrapper {
-    position: absolute;
-    right: 12px;
-    top: 0px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .mobile-menu-button {
+    display: none;
+    margin-left: auto;
   }
 }
 
@@ -72,7 +83,7 @@ p.comment-value {
   .edit-fields {
     input,
     .ant-select {
-      width: 250px;
+      width: 100%;
       margin-bottom: 4px;
     }
     input {
@@ -107,5 +118,58 @@ p.comment-value {
   margin-top: -40px;
   .ant-modal-body {
     min-height: 50vh;
+  }
+}
+
+// Mobile responsive styles
+@media screen and (max-width: 768px) {
+  .header {
+    padding: 0 12px;
+
+    .logo {
+      padding-right: 0;
+      img {
+        height: 48px;
+      }
+    }
+
+    .desktop-menu {
+      display: none !important;
+    }
+
+    .mobile-menu-button {
+      display: inline-flex;
+    }
+  }
+
+  .ant-layout-content {
+    padding: 12px 8px;
+  }
+
+  .ant-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ant-descriptions {
+    .ant-descriptions-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .book-scan-modal {
+    margin-top: 0;
+    top: 0;
+  }
+
+  .ant-modal {
+    .edit-fields {
+      input,
+      .ant-select {
+        width: 100%;
+      }
+    }
   }
 }

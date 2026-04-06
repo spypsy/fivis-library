@@ -258,13 +258,9 @@ const MyBooks = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <Button onClick={clearFilters} style={{ marginRight: 8 }}>
-          Clear Filters
-        </Button>
-        <Button onClick={clearSorting} style={{ marginRight: 8 }}>
-          Clear Sorting
-        </Button>
+      <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <Button onClick={clearFilters}>Clear Filters</Button>
+        <Button onClick={clearSorting}>Clear Sorting</Button>
         <Checkbox checked={showDeleteColumn} onChange={e => setShowDeleteColumn(e.target.checked)}>
           Show Delete Column
         </Checkbox>
@@ -277,6 +273,7 @@ const MyBooks = () => {
         rowKey={({ isbn }) => isbn}
         pagination={{ showSizeChanger: true, pageSizeOptions: ['25', '50', '100', '250'], defaultPageSize: 50 }}
         onChange={handleChange}
+        scroll={{ x: 800 }}
       />
     </div>
   );

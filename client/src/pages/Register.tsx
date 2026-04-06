@@ -36,17 +36,16 @@ const Register = ({ history }: RouteComponentProps) => {
   return (
     <div className="page register">
       <Row>
-        <Col span={8} />
-        <Col span={8}>
+        <Col xs={24} sm={{ span: 8, offset: 8 }}>
           <h2>Sign Up</h2>
         </Col>
       </Row>
       <Row>
-        <Col span={24}>
+        <Col xs={24} sm={24}>
           <Form
             name="basic"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
+            labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
+            wrapperCol={{ xs: { span: 24 }, sm: { span: 8 } }}
             initialValues={{ remember: true }}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
@@ -68,7 +67,7 @@ const Register = ({ history }: RouteComponentProps) => {
               <Input.Password />
             </Form.Item>
 
-            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+            <Form.Item wrapperCol={{ xs: { offset: 0, span: 24 }, sm: { offset: 8, span: 16 } }}>
               <Button type="primary" htmlType="submit" loading={registerLoading}>
                 Submit
               </Button>

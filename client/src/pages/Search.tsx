@@ -35,24 +35,36 @@ const SearchPage = () => {
   };
 
   const renderSearchTerm = (term: SearchTerm, index: number) => (
-    <Row gutter={16} key={index} style={{ marginBottom: 16 }}>
-      <Col span={4}>
+    <Row gutter={[16, 8]} key={index} style={{ marginBottom: 16 }}>
+      <Col xs={12} sm={4}>
         {index > 0 && (
-          <Select value={term.operator} onChange={value => handleSearchTermChange(index - 1, 'operator', value)}>
+          <Select
+            value={term.operator}
+            onChange={value => handleSearchTermChange(index - 1, 'operator', value)}
+            style={{ width: '100%' }}
+          >
             <Option value="and">AND</Option>
             <Option value="or">OR</Option>
             <Option value="not">NOT</Option>
           </Select>
         )}
       </Col>
-      <Col span={7}>
+      <Col xs={12} sm={2}>
+        <Button
+          icon={<CloseOutlined />}
+          onClick={() => handleRemoveSearchTerm(index)}
+          disabled={searchTerms.length === 1}
+          style={{ width: '100%' }}
+        />
+      </Col>
+      <Col xs={24} sm={10}>
         <Input
           placeholder="Search..."
           value={term.value}
           onChange={e => handleSearchTermChange(index, 'value', e.target.value)}
         />
       </Col>
-      <Col span={7}>
+      <Col xs={24} sm={8}>
         <Select
           value={term.property}
           onChange={value => handleSearchTermChange(index, 'property', value)}
@@ -65,14 +77,6 @@ const SearchPage = () => {
           ))}
         </Select>
       </Col>
-      <Col span={2}>
-        <Button
-          icon={<CloseOutlined />}
-          onClick={() => handleRemoveSearchTerm(index)}
-          disabled={searchTerms.length === 1}
-          style={{ width: '100%' }}
-        />
-      </Col>
     </Row>
   );
 
@@ -83,11 +87,11 @@ const SearchPage = () => {
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
       {searchTerms.map(renderSearchTerm)}
-      <Row gutter={16}>
-        <Col span={8}>
+      <Row gutter={[16, 8]}>
+        <Col xs={12} sm={8}>
           <Button onClick={handleAddSearchTerm}>Add Search Term</Button>
         </Col>
-        <Col span={4}>
+        <Col xs={12} sm={4}>
           <Button type="primary" onClick={handleSearch}>
             Search
           </Button>

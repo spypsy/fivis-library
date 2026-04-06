@@ -1,5 +1,5 @@
-import { BookOutlined, ScanOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Image, Layout, Menu, MenuProps, message } from 'antd';
+import { BookOutlined, MenuOutlined, ScanOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Drawer, Image, Layout, Menu, MenuProps, message } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -32,6 +32,7 @@ const NavBar = () => {
   const history = useHistory();
   const [, setUser] = useLocalStorage<User | null>('user', {});
   const [isAuthed, setAuthed] = useState<boolean>(false);
+  const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
   const user = localStorage.getItem('user');
   if (!!JSON.parse(user || '{}')?.id && !isAuthed) {
     setAuthed(!!JSON.parse(user || '{}')?.id);
@@ -42,15 +43,14 @@ const NavBar = () => {
       const user = localStorage.getItem('user');
       const isAuthed = !!JSON.parse(user || '{}')?.id;
       setAuthed(isAuthed);
+      setDrawerVisible(false);
     });
 
-    // Cleanup the listener when the component is unmounted
     return () => {
       unlisten();
     };
   }, [history, setAuthed]);
 
-  // HANDLERS
   const [, logOut] = useAxios(
     {
       url: '/api/user/logout',
@@ -61,9 +61,11 @@ const NavBar = () => {
 
   const onClick: MenuProps['onClick'] = e => {
     history.push(`/${e.key}`);
+    setDrawerVisible(false);
   };
   const onLogout = () => {
     setUser(null);
+    setDrawerVisible(false);
     logOut().then(() => {
       history.push('/login');
       message.success('Logged out');
@@ -78,7 +80,7 @@ const NavBar = () => {
       </div>
       <Menu
         theme="light"
-        className="nav-menu"
+        className="nav-menu desktop-menu"
         items={items}
         onClick={onClick}
         selectedKeys={[history.location.pathname.replace('/', '')]}
@@ -86,10 +88,38 @@ const NavBar = () => {
         defaultSelectedKeys={['scanBooks']}
       />
       {isAuthed && (
-        <div className="sign-out-wrapper">
+        <div className="sign-out-wrapper desktop-menu">
           <Button onClick={onLogout}>Sign out</Button>
         </div>
       )}
+      <Button
+        className="mobile-menu-button"
+        type="text"
+        icon={<MenuOutlined style={{ color: '#fff', fontSize: 20 }} />}
+        onClick={() => setDrawerVisible(true)}
+      />
+      <Drawer
+        title="Menu"
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        visible={drawerVisible}
+        bodyStyle={{ padding: 0 }}
+        width={250}
+      >
+        <Menu
+          items={items}
+          onClick={onClick}
+          selectedKeys={[history.location.pathname.replace('/', '')]}
+          mode="vertical"
+        />
+        {isAuthed && (
+          <div style={{ padding: '16px 24px' }}>
+            <Button onClick={onLogout} block>
+              Sign out
+            </Button>
+          </div>
+        )}
+      </Drawer>
     </Header>
   );
 };

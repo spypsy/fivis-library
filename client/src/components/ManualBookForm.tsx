@@ -17,36 +17,36 @@ const ManualBookForm = ({
   return (
     <Form<UserBook> form={formRef} onFinish={onFinish} layout="vertical" size="small">
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="title" label="Title" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="subtitle" label="Subtitle">
             <Input />
           </Form.Item>
         </Col>
       </Row>
       <Row gutter={16}>
-        <Col span={10}>
+        <Col xs={24} sm={10}>
           <Form.Item name="publisher" label="Publisher">
             <Input />
           </Form.Item>
         </Col>
-        <Col span={7}>
+        <Col xs={12} sm={7}>
           <Form.Item name="publishedDate" label="Published Year" rules={[{ required: true }]}>
             <DatePicker picker="year" style={{ width: '100%' }} />
           </Form.Item>
         </Col>
-        <Col span={7}>
+        <Col xs={12} sm={7}>
           <Form.Item name="originalPublishedYear" label="Original Published Year">
             <DatePicker picker="year" style={{ width: '100%' }} />
           </Form.Item>
         </Col>
       </Row>
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="tags" label="Tags">
             <Select
               mode="tags"
@@ -56,26 +56,26 @@ const ManualBookForm = ({
             />
           </Form.Item>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="authors" label="Authors" rules={[{ required: true }]}>
             <Select mode="tags" style={{ width: '100%' }} placeholder="Enter authors" />
           </Form.Item>
         </Col>
       </Row>
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="isbn" label="ISBN">
             <Input />
           </Form.Item>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="pageCount" label="Page Count">
-            <InputNumber min={1} />
+            <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
         </Col>
       </Row>
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="language" label="Language" rules={[{ required: true }]}>
             <Select
               showSearch
@@ -91,7 +91,7 @@ const ManualBookForm = ({
             />
           </Form.Item>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item name="originalLanguage" label="Original Language">
             <Select
               showSearch
@@ -110,7 +110,7 @@ const ManualBookForm = ({
       </Row>
 
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item
             name="description"
             label={
@@ -122,7 +122,7 @@ const ManualBookForm = ({
             <TextArea rows={4} />
           </Form.Item>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Form.Item
             name="comment"
             label={

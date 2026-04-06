@@ -56,7 +56,7 @@ const Home = () => {
   return (
     <>
       <Row>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <h1>
             Hi,{' '}
             {user?.username
@@ -70,10 +70,9 @@ const Home = () => {
             Click here!
           </Button>
         </Col>
-        <Col span={8} />
       </Row>
       <Row style={{ marginTop: 40 }}>
-        <Col span={24}>
+        <Col xs={24}>
           <h2>Or, Manually Add a Book</h2>
           <Collapse>
             <Panel header="Manually Add a Book" key="1">

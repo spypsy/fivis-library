@@ -86,8 +86,7 @@ export const Book = () => {
   return (
     <>
       <Row>
-        <Col span={4} />
-        <Col span={16}>
+        <Col xs={24} sm={{ span: 16, offset: 4 }}>
           <Skeleton loading={!!loading || !!saveLoading}>
             <Descriptions
               bordered
