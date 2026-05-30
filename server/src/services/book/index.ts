@@ -13,7 +13,14 @@ export async function getBookByIsbn(isbn: string): Promise<BookData> {
     throw Error(`Invalid ISBN input: ${isbn}`);
   }
 
-  const result = await axios.get<ResponseData>(`${GOOGLE_BOOKS_API_BASE + GOOGLE_BOOKS_API_BOOK}?q=isbn:${isbn}`);
+  const params = new URLSearchParams({ q: `isbn:${isbn}` });
+  const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
+  if (apiKey) {
+    params.set('key', apiKey);
+  }
+
+  const url = `${GOOGLE_BOOKS_API_BASE}${GOOGLE_BOOKS_API_BOOK}?${params.toString()}`;
+  const result = await axios.get<ResponseData>(url);
 
   if (result.data.totalItems === 0 || !result?.data?.items[0]?.volumeInfo) {
     throw Error('Not Found');
