@@ -1,28 +1,36 @@
 import {
   Button,
-  Col,
   DatePicker,
   Descriptions,
   Image,
   Input,
+  Popconfirm,
   Rate,
-  Row,
   Select,
   Skeleton,
+  Space,
   Tag,
   Typography,
   message,
 } from 'antd';
 import useAxios from 'axios-hooks';
+import PageShell from 'components/PageShell';
 import { languages } from 'countries-list';
 import { useTags } from 'hooks/useTags';
+import dayjs from 'dayjs';
 import isEqual from 'lodash.isequal';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { UserBook } from 'types';
 
 const { Paragraph } = Typography;
+
+const languageOptions = Object.entries(languages)
+  .sort((a, b) => a[1].name.localeCompare(b[1].name))
+  .map(([key, value]) => ({
+    value: key,
+    label: value.name,
+  }));
 
 export const Book = () => {
   const history = useHistory();
@@ -41,7 +49,6 @@ export const Book = () => {
     {
       url: `/api/books/${isbn}`,
       method: 'PUT',
-      data: { bookData },
     },
     { manual: true },
   );
@@ -55,15 +62,15 @@ export const Book = () => {
   );
 
   useEffect(() => {
-    if (fetchBookData && !bookData) {
+    if (fetchBookData) {
       editBookData(fetchBookData);
     }
-  }, [fetchBookData, bookData]);
+  }, [fetchBookData]);
 
   const onSave = async () => {
     setEditMode(false);
     if (!isEqual(fetchBookData, bookData)) {
-      const result = await saveBook();
+      const result = await saveBook({ data: { bookData } });
       if (result.status !== 200) {
         message.error('Error saving book');
         editBookData(fetchBookData);
@@ -83,61 +90,54 @@ export const Book = () => {
     }
   };
 
+  const actions = (
+    <Space wrap>
+      {editMode && (
+        <>
+          <Popconfirm title="Remove this book from your library?" onConfirm={onDelete} okText="Delete" okButtonProps={{ danger: true }}>
+            <Button danger>Delete</Button>
+          </Popconfirm>
+          <Button
+            onClick={() => {
+              setEditMode(false);
+              editBookData(fetchBookData);
+            }}
+          >
+            Cancel
+          </Button>
+        </>
+      )}
+      <Button
+        type={editMode ? 'primary' : 'default'}
+        onClick={() => {
+          if (editMode) {
+            onSave();
+          } else {
+            setEditMode(true);
+          }
+        }}
+      >
+        {editMode ? 'Save' : 'Edit'}
+      </Button>
+    </Space>
+  );
+
   return (
-    <>
-      <Row>
-        <Col xs={24} sm={{ span: 16, offset: 4 }}>
-          <Skeleton loading={!!loading || !!saveLoading}>
-            <Descriptions
-              bordered
-              column={{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }}
-              title={
-                <>
-                  {fetchBookData?.imageLink && <Image loading="eager" src={fetchBookData.imageLink}></Image>}
-                  <span style={{ marginLeft: '1rem' }}>{fetchBookData?.title}</span>
-                </>
-              }
-              extra={
-                <>
-                  {editMode && (
-                    <>
-                      <Button
-                        danger
-                        type="default"
-                        onClick={() => {
-                          onDelete();
-                        }}
-                        style={{ marginRight: '1rem' }}
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        type="default"
-                        onClick={() => {
-                          setEditMode(false);
-                          editBookData(fetchBookData);
-                        }}
-                        style={{ marginRight: '1rem' }}
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  )}
-                  <Button
-                    type={editMode ? 'primary' : 'default'}
-                    onClick={() => {
-                      if (editMode) {
-                        onSave();
-                      } else {
-                        setEditMode(true);
-                      }
-                    }}
-                  >
-                    {editMode ? 'Save' : 'Edit'}
-                  </Button>
-                </>
-              }
-            >
+    <PageShell title={fetchBookData?.title || 'Book'} extra={actions}>
+      <Skeleton loading={!!loading || !!saveLoading} active>
+        <div className="book-detail-layout">
+          <div className="book-detail-cover">
+            {fetchBookData?.imageLink && (
+              <Image loading="eager" src={fetchBookData.imageLink} alt={fetchBookData.title} />
+            )}
+            {bookData?.rating != null && bookData.rating > 0 && (
+              <div style={{ marginTop: 12 }}>
+                <Rate allowHalf value={bookData.rating} disabled={!editMode} onChange={rating => editBookData({ ...bookData!, rating })} />
+              </div>
+            )}
+          </div>
+          <div className="book-detail-meta">
+            <Descriptions bordered column={1} size="small">
               <Descriptions.Item label="Subtitle">
                 {editMode ? (
                   <Input
@@ -152,7 +152,6 @@ export const Book = () => {
               <Descriptions.Item label="Authors">
                 {bookData?.authors?.map(author => author.name).join(', ')}
               </Descriptions.Item>
-
               <Descriptions.Item label="Publisher">
                 {editMode ? (
                   <Input
@@ -163,7 +162,6 @@ export const Book = () => {
                   bookData?.publisher
                 )}
               </Descriptions.Item>
-
               <Descriptions.Item label="Published">
                 {bookData?.publishedDate
                   ? new Date(bookData?.publishedDate).toLocaleDateString('en-gb', {
@@ -171,58 +169,56 @@ export const Book = () => {
                     })
                   : ''}
               </Descriptions.Item>
-
-              <Descriptions.Item label="Originally Published">
+              <Descriptions.Item label="Originally published">
                 {editMode ? (
                   <DatePicker
                     picker="year"
                     onChange={e => editBookData({ ...bookData!, originalPublishedYear: e?.year() })}
-                    value={bookData!.originalPublishedYear! ? moment().year(bookData!.originalPublishedYear) : null}
+                    value={
+                      bookData?.originalPublishedYear
+                        ? dayjs().year(bookData.originalPublishedYear)
+                        : undefined
+                    }
                   />
                 ) : (
                   bookData?.originalPublishedYear
                 )}
               </Descriptions.Item>
-
               <Descriptions.Item label="Description">
-                <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                  {fetchBookData?.description}
-                </Paragraph>
-              </Descriptions.Item>
-              <Descriptions.Item label="Language">
-                <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                  {fetchBookData?.language ? languages[fetchBookData?.language].name : ''}
-                </Paragraph>
-              </Descriptions.Item>
-              <Descriptions.Item label="Original Language">
                 {editMode ? (
-                  <Select
-                    showSearch
-                    options={Object.entries(languages)
-                      .sort((a, b) => a[1].name.localeCompare(b[1].name))
-                      .map(([key, value]) => ({
-                        value: key,
-                        label: value.name,
-                      }))}
-                    value={bookData?.originalLanguage}
-                    onChange={val => editBookData({ ...bookData!, originalLanguage: val })}
-                    style={{ width: '100%' }}
-                    filterOption={(value, option) => {
-                      if (!option) {
-                        return false;
-                      }
-                      return option.label.toLowerCase().startsWith(value.toLowerCase());
-                    }}
+                  <Input.TextArea
+                    rows={4}
+                    value={bookData?.description}
+                    onChange={e => editBookData({ ...bookData!, description: e.target.value })}
                   />
                 ) : (
-                  <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                    {bookData?.originalLanguage ? languages[bookData.originalLanguage].name : ''}
+                  <Paragraph ellipsis={{ rows: 3, expandable: true, symbol: 'more' }}>
+                    {bookData?.description}
                   </Paragraph>
                 )}
               </Descriptions.Item>
+              <Descriptions.Item label="Language">
+                {bookData?.language ? languages[bookData.language]?.name : ''}
+              </Descriptions.Item>
+              <Descriptions.Item label="Original language">
+                {editMode ? (
+                  <Select
+                    showSearch
+                    options={languageOptions}
+                    value={bookData?.originalLanguage}
+                    onChange={val => editBookData({ ...bookData!, originalLanguage: val })}
+                    style={{ width: '100%' }}
+                    filterOption={(value, option) =>
+                      (option?.label ?? '').toLowerCase().startsWith(value.toLowerCase())
+                    }
+                  />
+                ) : (
+                  bookData?.originalLanguage ? languages[bookData.originalLanguage]?.name : ''
+                )}
+              </Descriptions.Item>
               {fetchBookData?.addedAt && (
-                <Descriptions.Item label="Added At">
-                  {new Date(fetchBookData?.addedAt).toLocaleDateString('en-gb', {
+                <Descriptions.Item label="Added">
+                  {new Date(fetchBookData.addedAt).toLocaleDateString('en-gb', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -236,18 +232,13 @@ export const Book = () => {
                     onChange={val =>
                       editBookData({
                         ...bookData!,
-                        tags: val.map(tag => tagsData?.find(t => t.name === tag) || { name: tag }),
+                        tags: val.map((tag: string) => tagsData?.find(t => t.name === tag) || { name: tag }),
                       })
                     }
                     style={{ width: '100%' }}
                     value={bookData?.tags?.map(tag => tag.name)}
-                  >
-                    {tagsData?.map(tag => (
-                      <Select.Option key={`${tag.name}.${tag.id}`} value={tag.name}>
-                        {tag.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
+                    options={tagsData?.map(tag => ({ value: tag.name, label: tag.name }))}
+                  />
                 ) : (
                   bookData?.tags?.map(tag => <Tag key={tag.name}>{tag.name}</Tag>)
                 )}
@@ -272,9 +263,9 @@ export const Book = () => {
                 />
               </Descriptions.Item>
             </Descriptions>
-          </Skeleton>
-        </Col>
-      </Row>
-    </>
+          </div>
+        </div>
+      </Skeleton>
+    </PageShell>
   );
 };

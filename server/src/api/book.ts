@@ -7,6 +7,11 @@ import { prepareUserBook } from './util';
 
 const router = express.Router();
 
+type RecommendationTagRequest = string | { name?: string };
+
+const normalizeRecommendationTags = (tags: RecommendationTagRequest[]) =>
+  tags.map(tag => (typeof tag === 'string' ? tag : tag.name || '')).filter(Boolean);
+
 export default (db: DB) => {
   // store book
   router.post('/', async (req: UserAuthRequest, res) => {
@@ -58,6 +63,13 @@ export default (db: DB) => {
     const userId = req.user.id;
     const books = await db.searchBooks(userId, search);
     res.send(books);
+  });
+
+  router.post('/random-recommendation', async (req: UserAuthRequest, res) => {
+    const tags = Array.isArray(req.body.tags) ? req.body.tags : [];
+    const tagOperator = req.body.tagOperator === 'or' ? 'or' : 'and';
+    const result = await db.getRandomBookRecommendation(req.user.id, normalizeRecommendationTags(tags), tagOperator);
+    res.send(result);
   });
 
   router.get('/:isbn', async (req: UserAuthRequest, res) => {

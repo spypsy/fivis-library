@@ -1,5 +1,7 @@
-import { Button, Col, Form, Input, Row, message } from 'antd';
+import { Button, Card, Form, Input, Typography, message } from 'antd';
 import useAxios from 'axios-hooks';
+import PageShell from 'components/PageShell';
+import { notifyAuthChanged } from 'hooks/authSession';
 import React, { useEffect } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { User } from 'types';
@@ -14,7 +16,7 @@ const Login = ({ history }: RouteComponentProps) => {
     { manual: true },
   );
 
-  const [, setUser] = useLocalStorage<User>('user', {});
+  const [, setUser] = useLocalStorage<User | null>('user', null);
 
   useEffect(() => {
     if (error) {
@@ -22,64 +24,47 @@ const Login = ({ history }: RouteComponentProps) => {
     }
     if (loginData?.user?.id) {
       setUser(loginData.user);
+      notifyAuthChanged();
       history.push('/home');
       message.success(`Logged in as ${loginData.user.username}`);
     }
   }, [loginData, history, setUser, error]);
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: { username: string; password: string }) => {
     postLogin({ data: { ...values } });
   };
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-
   return (
-    <div className="page login">
-      <Row>
-        <Col xs={24} sm={{ span: 8, offset: 8 }}>
-          <h2>Login</h2>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={24} sm={24}>
-          <Form
-            name="basic"
-            labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
-            wrapperCol={{ xs: { span: 24 }, sm: { span: 8 } }}
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
+    <PageShell narrow>
+      <Card title="Log in">
+        <Form name="login" layout="vertical" onFinish={onFinish} autoComplete="off">
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: 'Please enter your username' }]}
           >
-            <Form.Item
-              label="Username"
-              name="username"
-              rules={[{ required: true, message: 'Please input your username!' }]}
-            >
-              <Input />
-            </Form.Item>
+            <Input />
+          </Form.Item>
 
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true, message: 'Please input your password!' }]}
-            >
-              <Input.Password />
-            </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: 'Please enter your password' }]}
+          >
+            <Input.Password />
+          </Form.Item>
 
-            <Form.Item wrapperCol={{ xs: { offset: 0, span: 24 }, sm: { offset: 8, span: 16 } }}>
-              <Button type="primary" htmlType="submit" loading={loginLoading}>
-                Submit
-              </Button>
-              <br />
-              <Link to="/register">Or Sign Up here...</Link>
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
-    </div>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loginLoading} block>
+              Log in
+            </Button>
+          </Form.Item>
+          <Typography.Text>
+            New here? <Link to="/register">Create an account</Link>
+          </Typography.Text>
+        </Form>
+      </Card>
+    </PageShell>
   );
 };
 

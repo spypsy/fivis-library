@@ -1,17 +1,19 @@
-import { Button, Col, Collapse, Form, Row, Spin, message } from 'antd';
+import { Button, Card, Collapse, Form, Skeleton, Space, message } from 'antd';
 import { AxiosError } from 'axios';
 import useAxios from 'axios-hooks';
 import ManualBookForm from 'components/ManualBookForm';
+import PageShell from 'components/PageShell';
 import ScanModal from 'components/ScanModal';
 import { useTags } from 'hooks/useTags';
+import startCase from 'lodash.startcase';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Tag, User, UserBook } from 'types';
 
-const { Panel } = Collapse;
+import { ScanOutlined } from '@ant-design/icons';
 
 const Home = () => {
-  const [{ data: userData, loading }] = useAxios('/api/user/info', { manual: false });
+  const [{ data: userData, loading, error: userError }] = useAxios('/api/user/info', { manual: false });
   const [showModal, setShowModal] = useState(false);
   const toggleModal = () => setShowModal(state => !state);
   const [form] = Form.useForm();
@@ -20,7 +22,6 @@ const Home = () => {
 
   const onFinish = async (values: Partial<UserBook>) => {
     try {
-      // If you need to convert the year string to a Date object
       if (values.publishedDate) {
         values.publishedDate = new Date(values.publishedDate).toString();
       }
@@ -34,13 +35,10 @@ const Home = () => {
       form.resetFields();
       message.success(
         <>
-          <p>Book added successfully</p>
-          <p>
-            Go <Link to={`/book/${values.isbn}`}>here</Link> to see it
-          </p>
+          Book added.{' '}
+          <Link to={`/book/${values.isbn}`}>View book</Link>
         </>,
       );
-      // Optionally, show a success message or update the book list
     } catch (error) {
       console.error('Failed to add book:', error);
       message.error(`${(error as AxiosError).response?.data || (error as Error).message || 'Unknown error'}`);
@@ -50,42 +48,55 @@ const Home = () => {
   const tags: Tag[] = tagsData || [];
 
   if (loading || tagsLoading) {
-    return <Spin />;
+    return (
+      <PageShell>
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </PageShell>
+    );
   }
+
+  if (userError || !userData?.user) {
+    return (
+      <PageShell>
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </PageShell>
+    );
+  }
+
   const user = userData.user as User;
+  const displayName = startCase(user?.username || '');
+
   return (
-    <>
-      <Row>
-        <Col xs={24} sm={8}>
-          <h1>
-            Hi,{' '}
-            {user?.username
-              ?.split('')
-              ?.map((char, i) => (i === 0 ? char.toUpperCase() : char))
-              ?.join('')}
-            !
-          </h1>
-          <h1>Ready to scan some books?</h1>
-          <Button type="primary" onClick={toggleModal}>
-            Click here!
+    <PageShell title={`Hi, ${displayName}`} subtitle="Add books to your library">
+      <Card className="home-scan-card">
+        <Space direction="vertical" size="middle">
+          <div>
+            <strong>Scan barcode</strong>
+            <p style={{ margin: '8px 0 0', color: '#666' }}>
+              Use your barcode scanner (it sends Enter after each ISBN). You can also type an ISBN in the scan window.
+            </p>
+          </div>
+          <Button type="primary" size="large" icon={<ScanOutlined />} onClick={toggleModal}>
+            Open scanner
           </Button>
-        </Col>
-      </Row>
-      <Row style={{ marginTop: 40 }}>
-        <Col xs={24}>
-          <h2>Or, Manually Add a Book</h2>
-          <Collapse>
-            <Panel header="Manually Add a Book" key="1">
+        </Space>
+      </Card>
+
+      <Collapse
+        items={[
+          {
+            key: 'manual',
+            label: 'Add manually',
+            children: (
               <ManualBookForm onFinish={onFinish} addingBook={addingBook} tags={tags} formRef={form} />
-            </Panel>
-          </Collapse>
-        </Col>
-        {showModal && <ScanModal isOpen={showModal} toggleModal={toggleModal} />}
-      </Row>
-    </>
+            ),
+          },
+        ]}
+      />
+
+      {showModal && <ScanModal isOpen={showModal} toggleModal={toggleModal} />}
+    </PageShell>
   );
 };
-
-Home.propTypes = {};
 
 export default Home;

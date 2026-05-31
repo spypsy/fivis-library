@@ -1,4 +1,4 @@
-import { List, Modal, message } from 'antd';
+import { List, Modal, Typography, message } from 'antd';
 import useAxios from 'axios-hooks';
 import React, { useEffect, useState } from 'react';
 import { Book, BookSaveData, Tag, UserBook, UserEntryFields } from 'types';
@@ -22,11 +22,10 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
 
   const [{ data: bookSaveData, loading: bookSaveLoading }, submitBooks] = useAxios<BookSaveData>({}, { manual: true });
 
-  const [{ data: tagsData, loading: tagsLoading }] = useAxios<Tag[]>('/api/tags', { useCache: false });
+  const [{ data: tagsData }] = useAxios<Tag[]>('/api/tags', { useCache: false });
 
   useEffect(() => {
     if (scanError) {
-      console.log(scanError);
       message.error(scanError.response?.data || `Error scanning book: ${scanError.message}`);
     }
   }, [scanError]);
@@ -70,27 +69,29 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
       message.success(`Added ${bookSaveData.booksAdded} new books.`, 0.75);
       toggleModal();
     }
-  }, [bookSaveData, setBooks, toggleModal, books]);
+  }, [bookSaveData, toggleModal, books]);
 
   const isbnInput = React.createRef<HTMLInputElement>();
 
-  // ensure hidden input is focused for barcode scanning
   useEffect(() => {
     if (!isEditingBook) {
       isOpen && isbnInput?.current?.focus();
     }
   }, [isbnInput, isOpen, isEditingBook]);
 
-  // update UI for newly scanned book
   useEffect(() => {
     if (justSearched && bookData?.title && !books.find(({ isbn }) => bookData?.isbn === isbn)) {
       setBooks(state => [...state, bookData]);
     }
-  }, [bookData, setBooks, books, justSearched]);
+  }, [bookData, books, justSearched]);
 
   const onSubmitBarcode = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
     setJustSearched(true);
-    postBarcode({ url: `/api/books/search-external/${value}` });
+    postBarcode({ url: `/api/books/search-external/${trimmed}` });
   };
 
   const onSubmitUserBooks = () => {
@@ -126,25 +127,32 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
     }
   };
 
+  const okText = books.length ? `Add ${books.length} book${books.length === 1 ? '' : 's'}` : 'Add books';
+  const isDev = process.env.NODE_ENV === 'development';
+
   return (
     <Modal
-      title="Add Book"
+      title="Add books"
       className="book-scan-modal"
-      visible={isOpen}
+      open={isOpen}
       onCancel={toggleModal}
       onOk={onSubmitUserBooks}
-      okText="Submit"
-      // okButtonProps={{ disabled: !books.length }}
+      okText={okText}
+      okButtonProps={{ disabled: !books.length }}
       confirmLoading={bookSaveLoading}
     >
       <div onClick={() => isOpen && !isEditingBook && isbnInput?.current?.focus()}>
-        <p>Waiting for scan...</p>
-        <div id="book-scan-input">
+        <Typography.Paragraph type="secondary">
+          Scan a barcode or type an ISBN and press Enter.
+        </Typography.Paragraph>
+        <div className={isDev ? 'book-scan-input-dev' : 'book-scan-input-hidden'}>
           {isOpen && (
             <input
               disabled={bookLoading}
               autoFocus
               ref={isbnInput}
+              aria-label="ISBN input"
+              placeholder={isDev ? 'Type ISBN and press Enter' : undefined}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                   onSubmitBarcode((e.target as HTMLInputElement).value);
@@ -154,6 +162,9 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
             />
           )}
         </div>
+        {books.length === 0 && !bookLoading && (
+          <Typography.Text type="secondary">Waiting for scan…</Typography.Text>
+        )}
         <List
           loading={bookLoading}
           grid={{
@@ -166,6 +177,7 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
             xxl: 3,
           }}
           dataSource={books}
+          locale={{ emptyText: ' ' }}
           renderItem={(book, index) => {
             const editBookInfo = createEditBookInfo(index);
             return (
@@ -185,7 +197,5 @@ const ScanModal = ({ toggleModal, isOpen }: ScanModalProps) => {
     </Modal>
   );
 };
-
-ScanModal.propTypes = {};
 
 export default ScanModal;

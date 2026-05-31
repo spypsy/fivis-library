@@ -1,3 +1,4 @@
+import { Spin } from 'antd';
 import { useCheckAuth } from 'hooks/unauthorizedEffect';
 import { Book } from 'pages/Book';
 import Home from 'pages/Home';
@@ -35,10 +36,23 @@ interface ProtectedRouteProps extends RouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, ...rest }) => {
-  // const isAuthenticated = checkIfUserIsAuthenticated();
-  const { isAuthed } = useCheckAuth();
+  const { isAuthed, loading } = useCheckAuth();
 
-  return <Route {...rest} render={props => (isAuthed ? <Component {...props} /> : <Redirect to="/login" />)} />;
+  return (
+    <Route
+      {...rest}
+      render={props => {
+        if (loading) {
+          return (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+              <Spin size="large" />
+            </div>
+          );
+        }
+        return isAuthed ? <Component {...props} /> : <Redirect to="/login" />;
+      }}
+    />
+  );
 };
 
 export default Routes;

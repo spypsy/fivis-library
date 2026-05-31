@@ -1,31 +1,31 @@
 import { BookOutlined } from '@ant-design/icons';
-import { Button, Col, Result, Row } from 'antd';
+import { Button, Space, Typography } from 'antd';
+import PageShell from 'components/PageShell';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 const Welcome = () => {
+  const history = useHistory();
+
   return (
-    <Row>
-      <Col span="24">
-        <Result
-          icon={<BookOutlined />}
-          title={"Welcome to Fivi's Library!"}
-          extra={
-            <>
-              <Button type="primary">
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button type="primary">
-                <Link to="/register">Sign Up</Link>
-              </Button>
-            </>
-          }
-        />
-      </Col>
-    </Row>
+    <PageShell>
+      <div className="welcome-hero">
+        <BookOutlined style={{ fontSize: 72, color: '#25430D', marginBottom: 24 }} />
+        <Typography.Title level={2}>Welcome to Fivi&apos;s Library</Typography.Title>
+        <Typography.Paragraph type="secondary" style={{ fontSize: 16, maxWidth: 420, margin: '0 auto 32px' }}>
+          Catalog your books by barcode scan or manual entry.
+        </Typography.Paragraph>
+        <Space size="middle">
+          <Button type="primary" size="large" onClick={() => history.push('/register')}>
+            Sign up
+          </Button>
+          <Button size="large" onClick={() => history.push('/login')}>
+            Log in
+          </Button>
+        </Space>
+      </div>
+    </PageShell>
   );
 };
-
-Welcome.propTypes = {};
 
 export default Welcome;

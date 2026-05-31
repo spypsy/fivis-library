@@ -1,10 +1,12 @@
 import { DeleteOutlined, FilterFilled } from '@ant-design/icons';
-import { Button, Checkbox, Input, InputRef, Select, Table, Tag, Tooltip, message } from 'antd';
-import { ColumnProps } from 'antd/lib/table';
+import { Button, Empty, Input, InputRef, Popconfirm, Select, Space, Table, Tag, Tooltip, message } from 'antd';
+import { ColumnProps } from 'antd/es/table';
 import axios from 'axios';
 import useAxios from 'axios-hooks';
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import PageShell from 'components/PageShell';
+import RandomBookModal from 'components/RandomBookModal';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { Author, Book, Tag as TagType, UserBook } from 'types';
 
 const { Search } = Input;
@@ -26,7 +28,9 @@ const MyBooks = () => {
   const [filters, setFilters] = useState(emptyFilters);
   const [sortedInfo, setSortedInfo] = useState<any>({});
   const [searchInputRefs, setSearchInputRefs] = useState<Record<string, React.RefObject<InputRef>>>({});
-  const [showDeleteColumn, setShowDeleteColumn] = useState(false);
+  const [quickFilter, setQuickFilter] = useState('');
+  const [isRandomBookModalOpen, setRandomBookModalOpen] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     const refs: Record<string, React.RefObject<InputRef>> = {};
@@ -98,7 +102,7 @@ const MyBooks = () => {
       // Refresh the book list
       const { data } = await axios.get('/api/books/mine');
       setFilteredBooks(data);
-    } catch (error) {
+    } catch {
       message.error('Failed to delete book');
     }
   };
@@ -213,13 +217,13 @@ const MyBooks = () => {
           style={{ width: 200 }}
           placement="topLeft"
           title={tags.map(({ name }) => (
-            <Tag color="purple" key={name}>
+            <Tag key={name}>
               {name}
             </Tag>
           ))}
         >
           {tags.map(({ name }) => (
-            <Tag color="purple" key={name}>
+            <Tag key={name}>
               {name}
             </Tag>
           ))}
@@ -244,38 +248,74 @@ const MyBooks = () => {
       sorter: (a: UserBook, b: UserBook) => new Date(a.addedAt!)!.getTime() - new Date(b.addedAt!)!.getTime(),
       sortOrder: sortedInfo.columnKey === 'addedAt' && sortedInfo.order,
     },
+    {
+      title: '',
+      key: 'delete',
+      width: 56,
+      render: (_: string | undefined, record: UserBook) => (
+        <Popconfirm title="Remove from your library?" onConfirm={() => handleDelete(record?.isbn)} okText="Delete" okButtonProps={{ danger: true }}>
+          <Button icon={<DeleteOutlined />} danger type="text" />
+        </Popconfirm>
+      ),
+    },
   ];
 
-  if (showDeleteColumn) {
-    columns.push({
-      title: 'Delete',
-      key: 'delete',
-      render: (_: string | undefined, record: UserBook) => (
-        <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record?.isbn)} danger />
-      ),
+  const displayBooks = useMemo(() => {
+    if (!quickFilter.trim()) {
+      return filteredBooks;
+    }
+    const q = quickFilter.toLowerCase();
+    return filteredBooks.filter(book => {
+      const title = book.title?.toLowerCase() || '';
+      const authors = book.authors?.map(a => a.name.toLowerCase()).join(' ') || '';
+      return title.includes(q) || authors.includes(q);
     });
-  }
+  }, [filteredBooks, quickFilter]);
+
+  const total = booksData?.length ?? 0;
 
   return (
-    <div>
-      <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        <Button onClick={clearFilters}>Clear Filters</Button>
-        <Button onClick={clearSorting}>Clear Sorting</Button>
-        <Checkbox checked={showDeleteColumn} onChange={e => setShowDeleteColumn(e.target.checked)}>
-          Show Delete Column
-        </Checkbox>
-      </div>
-      Total: {booksData?.length}
-      <Table
-        loading={loading}
-        dataSource={filteredBooks}
-        columns={columns}
-        rowKey={({ isbn }) => isbn}
-        pagination={{ showSizeChanger: true, pageSizeOptions: ['25', '50', '100', '250'], defaultPageSize: 50 }}
-        onChange={handleChange}
-        scroll={{ x: 800 }}
-      />
-    </div>
+    <PageShell
+      title="My books"
+      subtitle={total === 1 ? '1 book' : `${total} books`}
+      extra={
+        <Button type="primary" onClick={() => setRandomBookModalOpen(true)}>
+          Random book
+        </Button>
+      }
+    >
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <Space wrap>
+          <Input.Search
+            placeholder="Quick filter by title or author"
+            allowClear
+            onChange={e => setQuickFilter(e.target.value)}
+            style={{ maxWidth: 320 }}
+          />
+          <Button onClick={clearFilters}>Clear filters</Button>
+          <Button onClick={clearSorting}>Clear sorting</Button>
+        </Space>
+        <Table
+          loading={loading}
+          dataSource={displayBooks}
+          columns={columns}
+          rowKey={(book: UserBook) => book.isbn}
+          pagination={{ showSizeChanger: true, pageSizeOptions: [25, 50, 100, 250], defaultPageSize: 50 }}
+          onChange={handleChange}
+          scroll={{ x: 800 }}
+          locale={{
+            emptyText: (
+              <Empty description="No books yet">
+                <Button type="primary" onClick={() => history.push('/home')}>
+                  Scan your first book
+                </Button>
+              </Empty>
+            ),
+          }}
+        />
+      </Space>
+      <RandomBookModal isOpen={isRandomBookModalOpen} onClose={() => setRandomBookModalOpen(false)} tags={tagsData || []} />
+    </PageShell>
   );
 };
 

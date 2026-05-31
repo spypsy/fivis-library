@@ -21,6 +21,8 @@ type SearchTerm = {
   operator: string;
 };
 
+type RandomBookTagOperator = 'and' | 'or';
+
 enum AddedStatus {
   ADDED,
   ALREADY_EXISTS,
@@ -279,6 +281,11 @@ export default class DB {
   }
 
   public async searchBooks(userId: string, searchTerms: SearchTerm[]) {
+    const activeTerms = searchTerms.filter(term => term.value?.trim());
+    if (!activeTerms.length) {
+      return [];
+    }
+
     let query = this.bookUserEntryRep
       .createQueryBuilder('user_entry')
       .leftJoinAndSelect('user_entry.book', 'book')
@@ -286,49 +293,65 @@ export default class DB {
       .leftJoinAndSelect('user_entry.tags', 'tag')
       .where('user_entry.user.id = :userId', { userId });
 
-    searchTerms.forEach((term, index) => {
+    activeTerms.forEach((term, index) => {
       let whereClause = '';
-      const parameter = `%${term.value}%`;
+      const parameter = `%${term.value.trim()}%`;
 
-      switch (term.property) {
-        case 'any':
-          whereClause = `(book.title LIKE :parameter OR book.subtitle LIKE :parameter OR book.description LIKE :parameter OR book.publisher LIKE :parameter OR book.isbn LIKE :parameter OR author.name LIKE :parameter OR tag.name LIKE :parameter)`;
-          break;
-        case 'title':
-        case 'subtitle':
-        case 'publisher':
-        case 'isbn':
-        case 'description':
-          whereClause = `book.${term.property} LIKE :parameter`;
-          break;
-        case 'tags':
-          whereClause = `tag.name LIKE :parameter`;
-          break;
-        case 'authors':
-          whereClause = `author.name LIKE :parameter`;
-          break;
-        default:
-          return; // Skip if the property is not recognized
+      if (term.property === 'any') {
+        whereClause = `(book.title LIKE :parameter OR book.subtitle LIKE :parameter OR book.description LIKE :parameter OR book.publisher LIKE :parameter OR book.isbn LIKE :parameter OR author.name LIKE :parameter OR tag.name LIKE :parameter)`;
+      } else if (
+        term.property === 'title' ||
+        term.property === 'subtitle' ||
+        term.property === 'publisher' ||
+        term.property === 'isbn' ||
+        term.property === 'description'
+      ) {
+        whereClause = `book.${term.property} LIKE :parameter`;
+      } else if (term.property === 'tags') {
+        whereClause = `tag.name LIKE :parameter`;
+      } else if (term.property === 'authors') {
+        whereClause = `author.name LIKE :parameter`;
+      } else {
+        return;
       }
+
+      const paramKey = `parameter${index}`;
 
       if (index === 0) {
-        query = query.andWhere(whereClause, { parameter });
+        query = query.andWhere(whereClause.replace(':parameter', `:${paramKey}`), { [paramKey]: parameter });
+      } else if (term.operator === 'or') {
+        query = query.orWhere(whereClause.replace(':parameter', `:${paramKey}`), { [paramKey]: parameter });
+      } else if (term.operator === 'not') {
+        query = query.andWhere(`NOT (${whereClause.replace(':parameter', `:${paramKey}`)})`, {
+          [paramKey]: parameter,
+        });
       } else {
-        switch (term.operator) {
-          case 'and':
-            query = query.andWhere(whereClause, { parameter });
-            break;
-          case 'or':
-            query = query.orWhere(whereClause, { parameter });
-            break;
-          case 'not':
-            query = query.andWhere(`NOT (${whereClause})`, { parameter });
-            break;
-          default:
-          // Handle default case if needed
-        }
+        query = query.andWhere(whereClause.replace(':parameter', `:${paramKey}`), { [paramKey]: parameter });
       }
     });
+
+    const entries = await query.getMany();
+    return entries.map(({ book, ...entry }) => ({
+      ...prepareUserBook(book, entry),
+    }));
+  }
+
+  public async getRandomBookRecommendation(userId: string, tagNames: string[], tagOperator: RandomBookTagOperator) {
+    const userBooks = await this.getUserBooks(userId);
+    const activeTagNames = tagNames.map(tagName => tagName.trim()).filter(Boolean);
+    const matchedBooks = activeTagNames.length
+      ? userBooks.filter(book => {
+          const bookTags = (book as { tags?: Tag[] }).tags || [];
+          const bookTagNames = bookTags.map(tag => tag.name);
+          if (tagOperator === 'or') {
+            return activeTagNames.some(tagName => bookTagNames.indexOf(tagName) >= 0);
+          }
+          return activeTagNames.every(tagName => bookTagNames.indexOf(tagName) >= 0);
+        })
+      : userBooks;
+
+    const book = matchedBooks[Math.floor(Math.random() * matchedBooks.length)];
+    return { book, totalMatches: matchedBooks.length };
   }
 
   public async deleteBookEntry(userId: string, isbn: string) {

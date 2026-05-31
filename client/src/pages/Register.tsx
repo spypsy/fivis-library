@@ -1,8 +1,11 @@
-import { Button, Col, Form, Input, Row, message } from 'antd';
+import { Button, Card, Form, Input, Typography, message } from 'antd';
 import useAxios from 'axios-hooks';
+import PageShell from 'components/PageShell';
+import { notifyAuthChanged } from 'hooks/authSession';
 import React, { useEffect } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { User } from 'types';
+import { useLocalStorage } from 'usehooks-ts';
 
 const Register = ({ history }: RouteComponentProps) => {
   const [{ data: registerData, loading: registerLoading, error: signupError }, postRegisterData] = useAxios<{
@@ -15,69 +18,55 @@ const Register = ({ history }: RouteComponentProps) => {
     { manual: true },
   );
 
+  const [, setUser] = useLocalStorage<User | null>('user', null);
+
   useEffect(() => {
     if (registerData?.user?.id) {
-      message.success('User created! Please login.', 0.5);
-      history.push('/login');
+      setUser(registerData.user);
+      notifyAuthChanged();
+      message.success('Account created!');
+      history.push('/home');
     }
     if (signupError) {
-      message.error(`Something went wrong: ${signupError.message}`);
+      message.error(signupError.response?.data?.message || signupError.message);
     }
-  }, [registerData, history, signupError]);
+  }, [registerData, history, signupError, setUser]);
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: { username: string; password: string }) => {
     postRegisterData({ data: { ...values } });
   };
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-
   return (
-    <div className="page register">
-      <Row>
-        <Col xs={24} sm={{ span: 8, offset: 8 }}>
-          <h2>Sign Up</h2>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={24} sm={24}>
-          <Form
-            name="basic"
-            labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
-            wrapperCol={{ xs: { span: 24 }, sm: { span: 8 } }}
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
+    <PageShell narrow>
+      <Card title="Sign up">
+        <Form name="register" layout="vertical" onFinish={onFinish} autoComplete="off">
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: 'Please choose a username' }]}
           >
-            <Form.Item
-              label="Username"
-              name="username"
-              rules={[{ required: true, message: 'Please input your username!' }]}
-            >
-              <Input />
-            </Form.Item>
+            <Input />
+          </Form.Item>
 
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true, message: 'Please input your password!' }]}
-            >
-              <Input.Password />
-            </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: 'Please choose a password' }]}
+          >
+            <Input.Password />
+          </Form.Item>
 
-            <Form.Item wrapperCol={{ xs: { offset: 0, span: 24 }, sm: { offset: 8, span: 16 } }}>
-              <Button type="primary" htmlType="submit" loading={registerLoading}>
-                Submit
-              </Button>
-              <br />
-              Already a user? <Link to="/login">Log in here...</Link>
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
-    </div>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={registerLoading} block>
+              Create account
+            </Button>
+          </Form.Item>
+          <Typography.Text>
+            Already have an account? <Link to="/login">Log in</Link>
+          </Typography.Text>
+        </Form>
+      </Card>
+    </PageShell>
   );
 };
 

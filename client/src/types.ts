@@ -4,6 +4,13 @@ export type LangEnum = keyof typeof languages;
 
 export type UserBook = Book & UserEntryFields;
 
+export type TagOperator = 'and' | 'or';
+
+export type RandomBookRecommendation = {
+  book?: UserBook;
+  totalMatches: number;
+};
+
 export type Tag = {
   id?: string;
   name: string;

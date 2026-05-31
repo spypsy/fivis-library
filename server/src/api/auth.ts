@@ -3,6 +3,7 @@ import { Request, Response, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
 
 import DB from '../db';
+import { clearAuthCookie, setAuthCookie } from '../cookieOptions';
 import { UserDao } from '../db/models/User';
 import { UserAuthRequest, tokenAuth } from '../middleware/jwt';
 
@@ -23,7 +24,14 @@ export default (db: DB) => {
 
     await db.createUser(user);
 
-    return res.send({ message: 'User created', user: { ...user, password: null } });
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'foobar_jwt');
+
+    setAuthCookie(res, token);
+
+    return res.send({
+      message: 'User created',
+      user: { id: user.id, username: user.username, email: user.email },
+    });
   });
 
   router.post('/login', async (req: Request, res: Response) => {
@@ -44,29 +52,18 @@ export default (db: DB) => {
     }
 
     // Create a signed JWT
-    const token = jwt.sign(
-      { userId: user.id }, // payload
-      process.env.JWT_SECRET as string, // secret key
-    );
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'foobar_jwt');
 
-    // Set JWT as a cookie on the client
-    res.cookie('token', token, {
-      domain: process.env.NODE_ENV === 'dev' ? 'localhost' : '.fivislibrary.com',
-      httpOnly: true,
-      // secure: true, // set to true if your application is using https
-      sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 30, // cookie expiration, in milliseconds
+    setAuthCookie(res, token);
+
+    return res.send({
+      message: 'Logged in successfully',
+      user: { id: user.id, username: user.username, email: user.email },
     });
-
-    return res.send({ message: 'Logged in successfully', user: { ...user, password: undefined } });
   });
 
   router.post('/logout', (req, res) => {
-    // Invalidate session or do other server-side logout logic here
-
-    // Overwrite the auth cookie to expire immediately
-    res.cookie('token', '', { expires: new Date(0), httpOnly: true, secure: true });
-
+    clearAuthCookie(res);
     res.status(200).send('Logged out');
   });
 
