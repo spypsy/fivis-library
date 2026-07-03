@@ -26,7 +26,7 @@ const MyBooks = () => {
   const [{ data: tagsData }] = useAxios<TagType[]>('/api/tags', { useCache: false });
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [filters, setFilters] = useState(emptyFilters);
-  const [sortedInfo, setSortedInfo] = useState<any>({});
+  const [sortedInfo, setSortedInfo] = useState<any>({ columnKey: 'addedAt', field: 'addedAt', order: 'descend' });
   const [searchInputRefs, setSearchInputRefs] = useState<Record<string, React.RefObject<InputRef>>>({});
   const [quickFilter, setQuickFilter] = useState('');
   const [isRandomBookModalOpen, setRandomBookModalOpen] = useState(false);
