@@ -1,5 +1,5 @@
 import { DeleteOutlined, FilterFilled } from '@ant-design/icons';
-import { Button, Empty, Input, InputRef, Popconfirm, Select, Space, Table, Tag, Tooltip, message } from 'antd';
+import { Button, Empty, Input, InputRef, Popconfirm, Select, Space, Switch, Table, Tag, Tooltip, message } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import axios from 'axios';
 import useAxios from 'axios-hooks';
@@ -30,6 +30,7 @@ const MyBooks = () => {
   const [searchInputRefs, setSearchInputRefs] = useState<Record<string, React.RefObject<InputRef>>>({});
   const [quickFilter, setQuickFilter] = useState('');
   const [isRandomBookModalOpen, setRandomBookModalOpen] = useState(false);
+  const [hideDeleteButtons, setHideDeleteButtons] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -248,16 +249,20 @@ const MyBooks = () => {
       sorter: (a: UserBook, b: UserBook) => new Date(a.addedAt!)!.getTime() - new Date(b.addedAt!)!.getTime(),
       sortOrder: sortedInfo.columnKey === 'addedAt' && sortedInfo.order,
     },
-    {
-      title: '',
-      key: 'delete',
-      width: 56,
-      render: (_: string | undefined, record: UserBook) => (
-        <Popconfirm title="Remove from your library?" onConfirm={() => handleDelete(record?.isbn)} okText="Delete" okButtonProps={{ danger: true }}>
-          <Button icon={<DeleteOutlined />} danger type="text" />
-        </Popconfirm>
-      ),
-    },
+    ...(hideDeleteButtons
+      ? []
+      : [
+          {
+            title: '',
+            key: 'delete',
+            width: 56,
+            render: (_: string | undefined, record: UserBook) => (
+              <Popconfirm title="Remove from your library?" onConfirm={() => handleDelete(record?.isbn)} okText="Delete" okButtonProps={{ danger: true }}>
+                <Button icon={<DeleteOutlined />} danger type="text" />
+              </Popconfirm>
+            ),
+          },
+        ]),
   ];
 
   const displayBooks = useMemo(() => {
@@ -294,6 +299,10 @@ const MyBooks = () => {
           />
           <Button onClick={clearFilters}>Clear filters</Button>
           <Button onClick={clearSorting}>Clear sorting</Button>
+          <Space size="small">
+            <Switch checked={hideDeleteButtons} onChange={setHideDeleteButtons} />
+            Hide delete buttons
+          </Space>
         </Space>
         <Table
           loading={loading}
