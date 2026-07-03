@@ -245,7 +245,15 @@ const MyBooks = () => {
       title: 'Date Added',
       dataIndex: 'addedAt',
       key: 'addedAt',
-      render: (dateAdded: string) => <span>{new Date(dateAdded).toLocaleDateString()}</span>,
+      render: (dateAdded: string) => (
+        <span>
+          {new Date(dateAdded).toLocaleDateString('en-gb', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })}
+        </span>
+      ),
       sorter: (a: UserBook, b: UserBook) => new Date(a.addedAt!)!.getTime() - new Date(b.addedAt!)!.getTime(),
       sortOrder: sortedInfo.columnKey === 'addedAt' && sortedInfo.order,
     },
