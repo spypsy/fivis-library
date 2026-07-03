@@ -30,7 +30,7 @@ const MyBooks = () => {
   const [searchInputRefs, setSearchInputRefs] = useState<Record<string, React.RefObject<InputRef>>>({});
   const [quickFilter, setQuickFilter] = useState('');
   const [isRandomBookModalOpen, setRandomBookModalOpen] = useState(false);
-  const [hideDeleteButtons, setHideDeleteButtons] = useState(false);
+  const [showDeleteButtons, setShowDeleteButtons] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -249,9 +249,8 @@ const MyBooks = () => {
       sorter: (a: UserBook, b: UserBook) => new Date(a.addedAt!)!.getTime() - new Date(b.addedAt!)!.getTime(),
       sortOrder: sortedInfo.columnKey === 'addedAt' && sortedInfo.order,
     },
-    ...(hideDeleteButtons
-      ? []
-      : [
+    ...(showDeleteButtons
+      ? [
           {
             title: '',
             key: 'delete',
@@ -262,7 +261,8 @@ const MyBooks = () => {
               </Popconfirm>
             ),
           },
-        ]),
+        ]
+      : []),
   ];
 
   const displayBooks = useMemo(() => {
@@ -300,8 +300,8 @@ const MyBooks = () => {
           <Button onClick={clearFilters}>Clear filters</Button>
           <Button onClick={clearSorting}>Clear sorting</Button>
           <Space size="small">
-            <Switch checked={hideDeleteButtons} onChange={setHideDeleteButtons} />
-            Hide delete buttons
+            <Switch checked={showDeleteButtons} onChange={setShowDeleteButtons} />
+            Show delete buttons
           </Space>
         </Space>
         <Table
