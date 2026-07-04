@@ -4,4 +4,5 @@ yarn-error.log
 */.env
 **/.DS_Store
 **/*.db
-deploy.sh
+backups/
+scripts/
