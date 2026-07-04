@@ -154,6 +154,7 @@ const UserBooksTable = ({
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
+      minWidth: 240,
       ellipsis: true,
       render: (title: string | undefined, book: UserBook) => (
         <Link to={`/book/${book.isbn}`}>
