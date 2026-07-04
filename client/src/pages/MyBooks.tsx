@@ -5,6 +5,7 @@ import PageShell from 'components/PageShell';
 import UserBooksTable from 'components/UserBooksTable';
 import React, { useCallback, useEffect, useState } from 'react';
 import { UserBook } from 'types';
+import { markPageDataReady } from 'utils/apiPerf';
 import { readMyBooksCache, writeMyBooksCache } from 'utils/myBooksStorage';
 
 const MyBooks = () => {
@@ -20,6 +21,7 @@ const MyBooks = () => {
       if (fresh) {
         setBooksData(fresh);
         writeMyBooksCache(fresh);
+        markPageDataReady('my-books', { bookCount: fresh.length });
       }
     });
     return () => {

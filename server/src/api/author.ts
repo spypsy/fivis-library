@@ -2,6 +2,7 @@ import express from 'express';
 
 import DB from '../db';
 import { UserAuthRequest } from '../middleware/jwt';
+import { appendServerTiming, elapsedMs } from '../utils/serverTiming';
 
 const router = express.Router();
 
@@ -33,13 +34,38 @@ export default (db: DB) => {
 
   router.get('/by-name/:name', async (req: UserAuthRequest, res) => {
     const name = decodeURIComponent(req.params.name);
+
+    const authorLookupStart = performance.now();
     const author = await db.findAuthorByName(name);
+    const authorLookupMs = elapsedMs(authorLookupStart);
     if (!author) {
       return res.status(404).send('Author not found');
     }
 
-    const books = await db.getUserBooksByAuthor(req.user.id, author.id);
-    res.send({ author, books });
+    const booksDbStart = performance.now();
+    const userData = await db.loadUserBookEntriesForUser(req.user.id);
+    const booksDbMs = elapsedMs(booksDbStart);
+
+    const mapStart = performance.now();
+    const allBooks = db.mapBookEntriesToUserBooks(userData);
+    const mapMs = elapsedMs(mapStart);
+
+    const filterStart = performance.now();
+    const books = allBooks.filter(book => book.authors?.some(entry => entry.id === author.id));
+    const filterMs = elapsedMs(filterStart);
+
+    const jsonStart = performance.now();
+    const body = JSON.stringify({ author, books });
+    const jsonMs = elapsedMs(jsonStart);
+
+    appendServerTiming(res, [
+      { name: 'author_db', durMs: authorLookupMs },
+      { name: 'books_db', durMs: booksDbMs },
+      { name: 'map', durMs: mapMs },
+      { name: 'filter', durMs: filterMs },
+      { name: 'json', durMs: jsonMs },
+    ]);
+    res.type('json').send(body);
   });
 
   router.put('/:id', async (req: UserAuthRequest, res) => {

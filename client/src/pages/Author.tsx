@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Author, UserBook } from 'types';
 import { authorPagePath } from 'utils/authorPath';
+import { markPageDataReady } from 'utils/apiPerf';
 
 type AuthorPageData = {
   author: Author;
@@ -31,7 +32,13 @@ const AuthorPage = () => {
     if (data?.author.name) {
       setNameDraft(data.author.name);
     }
-  }, [data?.author.name]);
+    if (data && !loading) {
+      markPageDataReady('author', {
+        author: data.author.name,
+        bookCount: data.books.length,
+      });
+    }
+  }, [data, loading]);
 
   const onSaveName = async () => {
     if (!data?.author.id) {

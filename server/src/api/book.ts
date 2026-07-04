@@ -3,6 +3,7 @@ import express from 'express';
 import DB from '../db';
 import { UserAuthRequest } from '../middleware/jwt';
 import { getBookByIsbn } from '../services/book';
+import { appendServerTiming, elapsedMs } from '../utils/serverTiming';
 import { prepareUserBook } from './util';
 
 const router = express.Router();
@@ -36,8 +37,24 @@ export default (db: DB) => {
   });
 
   router.get('/mine', async (req: UserAuthRequest, res) => {
-    const books = await db.getUserBooks(req.user.id);
-    res.send(books);
+    const dbStart = performance.now();
+    const userData = await db.loadUserBookEntriesForUser(req.user.id);
+    const dbMs = elapsedMs(dbStart);
+
+    const mapStart = performance.now();
+    const books = db.mapBookEntriesToUserBooks(userData);
+    const mapMs = elapsedMs(mapStart);
+
+    const jsonStart = performance.now();
+    const body = JSON.stringify(books);
+    const jsonMs = elapsedMs(jsonStart);
+
+    appendServerTiming(res, [
+      { name: 'db', durMs: dbMs },
+      { name: 'map', durMs: mapMs },
+      { name: 'json', durMs: jsonMs },
+    ]);
+    res.type('json').send(body);
   });
 
   // get book data from external API

@@ -26,6 +26,7 @@ async function main() {
         ? ['http://localhost:3000', 'http://localhost:8080', 'http://localhost']
         : 'http://fivislibrary.com',
     credentials: true,
+    exposedHeaders: ['Server-Timing'],
   };
   app.use(cors(corsOptions));
   app.use(bodyParser.json());

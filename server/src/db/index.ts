@@ -344,16 +344,25 @@ export default class DB {
     return entry;
   }
 
-  public async getUserBooks(userId: string) {
-    const userData = await this.userRep.findOne({
+  public async loadUserBookEntriesForUser(userId: string) {
+    return this.userRep.findOne({
       where: { id: userId },
       relations: { bookEntries: { book: true, user: true, tags: true } },
     });
-    const result = userData.bookEntries.map(({ book, ...entry }) => ({
+  }
+
+  public mapBookEntriesToUserBooks(userData: UserDao | null | undefined) {
+    if (!userData?.bookEntries?.length) {
+      return [];
+    }
+    return userData.bookEntries.map(({ book, ...entry }) => ({
       ...prepareUserBook(book, entry),
     }));
+  }
 
-    return result;
+  public async getUserBooks(userId: string) {
+    const userData = await this.loadUserBookEntriesForUser(userId);
+    return this.mapBookEntriesToUserBooks(userData);
   }
 
   public async searchBooks(userId: string, searchTerms: SearchTerm[]) {
