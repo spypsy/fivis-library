@@ -1,14 +1,18 @@
 import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Card, Image, Input, List, Select, Tag } from 'antd';
+import BookAuthorsEditor from 'components/BookAuthorsEditor';
 import { languages } from 'countries-list';
 import React, { useState } from 'react';
-import { Book, Tag as TagType, UserEntryFields } from 'types';
+import { Book, Tag as TagType, UserEntryFields, Author } from 'types';
+import { normalizeAuthorsInput } from 'utils/searchAuthors';
+
+type ScanBookEditFields = Partial<UserEntryFields & Pick<Book, 'authors' | 'subtitle' | 'publisher' | 'title'>>;
 
 type NewBookProps = {
   book: Book;
   userFields: UserEntryFields;
   tags: TagType[];
-  editBookInfo: (info: Partial<UserEntryFields>) => void;
+  editBookInfo: (info: ScanBookEditFields) => void;
   removeBook: (isbn: string) => void;
   onStartEditingBook: () => void;
   onStopEditingBook: () => void;
@@ -36,63 +40,84 @@ const NewBook = ({
   };
   return (
     <List.Item>
-      <Card title={book.title} className="book-preview">
-        <div>
+      <Card
+        title={
+          isEditingBook ? (
+            <Input value={book.title} onChange={e => editBookInfo({ title: e.target.value })} />
+          ) : (
+            book.title
+          )
+        }
+        className="book-preview"
+      >
+        <div className="book-preview-meta">
           {book.imageLinks && (
             <Image src={book.imageLinks.thumbnail} preview={{ src: book.imageLinks.smallThumbnail }} />
           )}
-          <p>Author: {book.authors?.join(', ')}</p>
+          <div className="book-preview-row book-preview-authors">
+            <span className="book-preview-label">Authors</span>
+            <BookAuthorsEditor
+              authors={normalizeAuthorsInput(book.authors as (Author | string)[] | undefined)}
+              editMode={isEditingBook}
+              onChange={authors => editBookInfo({ authors })}
+            />
+          </div>
           {(book.subtitle || isEditingBook) && (
-            <p>
-              Subtitle:{' '}
+            <div className="book-preview-row">
+              <span className="book-preview-label">Subtitle</span>
               {isEditingBook ? (
                 <Input
-                  style={{ display: 'inline-block', width: 'auto' }}
                   value={userFields.subtitle || book.subtitle}
                   onChange={e => editBookInfo({ subtitle: e.target.value })}
                 />
               ) : (
                 userFields.subtitle || book.subtitle
               )}
-            </p>
+            </div>
           )}
-          {book.publishedDate && <p>Published: {book.publishedDate}</p>}
-          {book.language && <p>Language: {languages[book.language].name}</p>}
-          {(book.publisher || isEditingBook) &&
-            (isEditingBook ? (
-              <p>
-                {' '}
-                Publisher:{' '}
+          {book.publishedDate && (
+            <div className="book-preview-row book-preview-readonly">Published: {book.publishedDate}</div>
+          )}
+          {book.language && (
+            <div className="book-preview-row book-preview-readonly">Language: {languages[book.language].name}</div>
+          )}
+          {(book.publisher || isEditingBook) && (
+            <div className="book-preview-row">
+              <span className="book-preview-label">Publisher</span>
+              {isEditingBook ? (
                 <Input
-                  style={{ display: 'inline-block', width: 'auto' }}
                   value={userFields.publisher || book.publisher}
                   onChange={e => editBookInfo({ publisher: e.target.value || '' })}
-                ></Input>
-              </p>
-            ) : (
-              <p>Publisher: {book.publisher}</p>
-            ))}
+                />
+              ) : (
+                book.publisher
+              )}
+            </div>
+          )}
 
           {!isEditingBook && !!userFields.tags?.length && (
-            <p>
+            <div className="book-preview-row book-preview-readonly">
               Tags:{' '}
               {userFields.tags.map(tag => (
                 <Tag key={tag.name}>{tag.name}</Tag>
               ))}
-            </p>
+            </div>
           )}
           {!isEditingBook && userFields.originalPublishedYear && (
-            <p>Originally Published: {userFields.originalPublishedYear}</p>
+            <div className="book-preview-row book-preview-readonly">
+              Originally Published: {userFields.originalPublishedYear}
+            </div>
           )}
           {!isEditingBook && userFields.originalLanguage && (
-            <p>Original Language: {languages[userFields.originalLanguage].name}</p>
+            <div className="book-preview-row book-preview-readonly">
+              Original Language: {languages[userFields.originalLanguage].name}
+            </div>
           )}
           {!isEditingBook && userFields.comment && (
-            <p>
+            <div className="book-preview-row book-preview-readonly">
               Comment: <p className="comment-value">{userFields.comment}</p>
-            </p>
+            </div>
           )}
-          {/** EDIT FIELDS */}
           {isEditingBook && (
             <div className="edit-fields">
               <Select

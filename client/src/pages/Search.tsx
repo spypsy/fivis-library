@@ -5,6 +5,7 @@ import startCase from 'lodash.startcase';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useAxios from 'axios-hooks';
+import AuthorLinks from 'components/AuthorLinks';
 import PageShell from 'components/PageShell';
 import { Author, Tag as TagType, UserBook } from 'types';
 
@@ -120,7 +121,7 @@ const SearchPage = () => {
     {
       title: 'Authors',
       dataIndex: 'authors',
-      render: (authors: Author[]) => authors?.map(a => a.name).join(', '),
+      render: (authors: Author[]) => <AuthorLinks authors={authors} />,
     },
     {
       title: 'Tags',

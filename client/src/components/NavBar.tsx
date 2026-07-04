@@ -1,4 +1,4 @@
-import { BookOutlined, MenuOutlined, ScanOutlined, SearchOutlined } from '@ant-design/icons';
+import { BookOutlined, MenuOutlined, ScanOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Drawer, Image, Layout, Menu, MenuProps, message } from 'antd';
 import useAxios from 'axios-hooks';
 import { clearStaleSession, readIsAuthedFromStorage } from 'hooks/authSession';
@@ -13,14 +13,19 @@ const { Header } = Layout;
 
 const appMenuItems: MenuProps['items'] = [
   {
+    label: 'Scan',
+    key: 'home',
+    icon: <ScanOutlined />,
+  },
+  {
     label: 'My Books',
     key: 'my-books',
     icon: <BookOutlined />,
   },
   {
-    label: 'Scan',
-    key: 'home',
-    icon: <ScanOutlined />,
+    label: 'Authors',
+    key: 'authors',
+    icon: <TeamOutlined />,
   },
   {
     label: 'Search',
@@ -31,7 +36,7 @@ const appMenuItems: MenuProps['items'] = [
 
 function navSelectedKey(pathname: string): string[] {
   const segment = pathname.replace(/^\//, '').split('/')[0];
-  if (segment === 'home' || segment === 'my-books' || segment === 'search') {
+  if (segment === 'home' || segment === 'my-books' || segment === 'search' || segment === 'authors') {
     return [segment];
   }
   return [];

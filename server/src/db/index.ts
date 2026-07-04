@@ -185,22 +185,8 @@ export default class DB {
       book.imageLink = bookData.imageLinks?.thumbnail;
     }
 
-    // create / fetch book authors
-    const { authors } = bookData;
-    let authorEntities: AuthorDao[] = [];
-    // check if authors already exist
-    // if not add them to DB
-    if (authors.length) {
-      for (const authorName of authors) {
-        let author = await this.findAuthorByName(authorName);
-        if (!author) {
-          author = new AuthorDao();
-          author.name = authorName;
-        }
-        authorEntities.push(author);
-      }
-    }
-    book.authors = authorEntities;
+    const authorInputs = this.normalizeAuthorInputs(bookData.authors || []);
+    book.authors = authorInputs.length ? await this.resolveAuthorEntries(authorInputs) : [];
 
     const tags = await this.handleTags(bookData.tags);
 
@@ -238,23 +224,114 @@ export default class DB {
     return book;
   }
 
-  public async updateBook(userId: string, isbn: string, updateData: Partial<BookUserEntryDao>) {
+  public async updateBook(
+    userId: string,
+    isbn: string,
+    updateData: Partial<BookUserEntryDao> & { authors?: { id?: string; name: string }[]; title?: string },
+  ) {
     const dbBookEntry = await this.getBookEntry(userId, isbn);
     if (!dbBookEntry) {
       throw new Error('No book to update.');
     }
 
-    if (updateData.tags) {
-      const tags = await this.handleTags(updateData.tags);
-      updateData.tags = tags;
+    if (updateData.authors) {
+      await this.setBookAuthors(isbn, updateData.authors);
+    }
+
+    if (updateData.title !== undefined) {
+      const book = await this.getBook(isbn);
+      if (book) {
+        book.title = updateData.title;
+        await this.bookRep.save(book);
+      }
+    }
+
+    const entryUpdate = { ...updateData };
+    delete entryUpdate.authors;
+    delete entryUpdate.title;
+
+    if (entryUpdate.tags) {
+      const tags = await this.handleTags(entryUpdate.tags);
+      entryUpdate.tags = tags;
     }
 
     const updatedBookEntry = {
       ...dbBookEntry,
-      ...updateData,
+      ...entryUpdate,
     };
 
     await this.bookUserEntryRep.save(updatedBookEntry);
+  }
+
+  public async searchAuthorsByName(query: string, limit = 20) {
+    return this.authorRep
+      .createQueryBuilder('author')
+      .where('author.name LIKE :query', { query: `%${query}%` })
+      .orderBy('author.name', 'ASC')
+      .take(limit)
+      .getMany();
+  }
+
+  public async createAuthor(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      throw new Error('Name is required');
+    }
+
+    const existing = await this.findAuthorByName(trimmed);
+    if (existing) {
+      throw new Error('An author with that name already exists.');
+    }
+
+    const author = new AuthorDao();
+    author.name = trimmed;
+    await this.authorRep.save(author);
+    return author;
+  }
+
+  private async resolveAuthorEntries(authors: { id?: string; name: string }[]): Promise<AuthorDao[]> {
+    const authorEntities: AuthorDao[] = [];
+    for (const author of authors) {
+      if (author.id) {
+        const byId = await this.findAuthorById(author.id);
+        if (byId) {
+          authorEntities.push(byId);
+          continue;
+        }
+      }
+
+      let entity = await this.findAuthorByName(author.name);
+      if (!entity) {
+        entity = new AuthorDao();
+        entity.name = author.name;
+      }
+      authorEntities.push(entity);
+    }
+    return authorEntities;
+  }
+
+  private normalizeAuthorInputs(
+    authors: (string | { id?: string; name: string })[],
+  ): { id?: string; name: string }[] {
+    return authors.map(author => {
+      if (typeof author === 'string') {
+        return { name: author };
+      }
+      return { id: author.id, name: author.name };
+    });
+  }
+
+  private async setBookAuthors(isbn: string, authors: { id?: string; name: string }[]) {
+    const book = await this.bookRep.findOne({
+      where: { isbn },
+      relations: ['authors'],
+    });
+    if (!book) {
+      throw new Error('Book not found.');
+    }
+
+    book.authors = await this.resolveAuthorEntries(authors);
+    await this.bookRep.save(book);
   }
 
   public async getBookEntry(userId: string, isbn: string) {
@@ -382,8 +459,75 @@ export default class DB {
     return authors;
   }
 
+  public async getAuthorSummariesForUser(userId: string) {
+    const userData = await this.userRep.findOne({
+      where: { id: userId },
+      relations: { bookEntries: { book: { authors: true } } },
+    });
+    if (!userData?.bookEntries?.length) {
+      return [];
+    }
+
+    const summaries = new Map<
+      string,
+      { id: string; name: string; bookCount: number; lastUpdated?: Date }
+    >();
+
+    for (const entry of userData.bookEntries) {
+      for (const author of entry.book?.authors || []) {
+        const existing = summaries.get(author.id);
+        if (!existing) {
+          summaries.set(author.id, {
+            id: author.id,
+            name: author.name,
+            bookCount: 1,
+            lastUpdated: entry.addedAt,
+          });
+        } else {
+          existing.bookCount += 1;
+          if (entry.addedAt && (!existing.lastUpdated || entry.addedAt > existing.lastUpdated)) {
+            existing.lastUpdated = entry.addedAt;
+          }
+        }
+      }
+    }
+
+    return Array.from(summaries.values()).map(summary => ({
+      id: summary.id,
+      name: summary.name,
+      bookCount: summary.bookCount,
+      lastUpdated: summary.lastUpdated?.toISOString(),
+    }));
+  }
+
   public async findAuthorByName(name: string) {
     const author = await this.authorRep.findOneBy({ name });
+    return author;
+  }
+
+  public async findAuthorById(id: string) {
+    const author = await this.authorRep.findOneBy({ id });
+    return author;
+  }
+
+  public async getUserBooksByAuthor(userId: string, authorId: string) {
+    const books = await this.getUserBooks(userId);
+    return books.filter(book => book.authors?.some(author => author.id === authorId));
+  }
+
+  public async updateAuthorName(id: string, name: string) {
+    const author = await this.authorRep.findOneBy({ id });
+    if (!author) {
+      throw new Error('Author not found.');
+    }
+
+    const duplicate = await this.authorRep.findOneBy({ name });
+    if (duplicate && duplicate.id !== id) {
+      throw new Error('An author with that name already exists.');
+    }
+
+    author.name = name;
+    await this.authorRep.save(author);
     return author;
   }
 

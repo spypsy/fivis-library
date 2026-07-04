@@ -1,7 +1,10 @@
 import { Button, Col, DatePicker, Form, FormInstance, Input, InputNumber, Row, Select } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
+import { BookAuthorsEditorFormControl } from 'components/BookAuthorsEditor';
 import { languages } from 'countries-list';
-import { Tag, UserBook } from 'types';
+import { Author, Tag, UserBook } from 'types';
+
+const EMPTY_AUTHORS: Author[] = [];
 
 const ManualBookForm = ({
   onFinish,
@@ -57,8 +60,18 @@ const ManualBookForm = ({
           </Form.Item>
         </Col>
         <Col xs={24} sm={12}>
-          <Form.Item name="authors" label="Authors" rules={[{ required: true }]}>
-            <Select mode="tags" style={{ width: '100%' }} placeholder="Enter authors" />
+          <Form.Item
+            name="authors"
+            label="Authors"
+            initialValue={EMPTY_AUTHORS}
+            rules={[
+              {
+                validator: (_, value: Author[] | undefined) =>
+                  value?.length ? Promise.resolve() : Promise.reject(new Error('At least one author is required')),
+              },
+            ]}
+          >
+            <BookAuthorsEditorFormControl />
           </Form.Item>
         </Col>
       </Row>

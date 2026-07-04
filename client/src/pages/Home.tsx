@@ -6,9 +6,9 @@ import PageShell from 'components/PageShell';
 import ScanModal from 'components/ScanModal';
 import { useTags } from 'hooks/useTags';
 import startCase from 'lodash.startcase';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Tag, User, UserBook } from 'types';
+import { User, UserBook } from 'types';
 
 import { ScanOutlined } from '@ant-design/icons';
 
@@ -20,7 +20,7 @@ const Home = () => {
   const [{ loading: addingBook }, executeAddBook] = useAxios({ url: '/api/books', method: 'POST' }, { manual: true });
   const { tags: tagsData, loading: tagsLoading } = useTags();
 
-  const onFinish = async (values: Partial<UserBook>) => {
+  const onFinish = useCallback(async (values: Partial<UserBook>) => {
     try {
       if (values.publishedDate) {
         values.publishedDate = new Date(values.publishedDate).toString();
@@ -43,9 +43,14 @@ const Home = () => {
       console.error('Failed to add book:', error);
       message.error(`${(error as AxiosError).response?.data || (error as Error).message || 'Unknown error'}`);
     }
-  };
+  }, [executeAddBook, form]);
 
-  const tags: Tag[] = tagsData || [];
+  const manualForm = useMemo(
+    () => (
+      <ManualBookForm onFinish={onFinish} addingBook={addingBook} tags={tagsData ?? []} formRef={form} />
+    ),
+    [onFinish, addingBook, tagsData, form],
+  );
 
   if (loading || tagsLoading) {
     return (
@@ -87,9 +92,8 @@ const Home = () => {
           {
             key: 'manual',
             label: 'Add manually',
-            children: (
-              <ManualBookForm onFinish={onFinish} addingBook={addingBook} tags={tags} formRef={form} />
-            ),
+            forceRender: true,
+            children: manualForm,
           },
         ]}
       />

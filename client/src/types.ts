@@ -58,7 +58,14 @@ export type BookSaveData = {
 
 export type Author = {
   name: string;
-  id: number;
+  id: string;
+};
+
+export type AuthorSummary = {
+  id: string;
+  name: string;
+  bookCount: number;
+  lastUpdated?: string;
 };
 
 export type ImageLinks = {

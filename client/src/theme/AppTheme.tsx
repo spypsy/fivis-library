@@ -8,6 +8,9 @@ export const AppTheme: React.FC<{ children: React.ReactNode }> = ({ children }) 
     theme={{
       token: {
         colorPrimary: BRAND_PRIMARY,
+        colorLink: BRAND_PRIMARY,
+        colorLinkHover: BRAND_PRIMARY,
+        colorLinkActive: BRAND_PRIMARY,
         borderRadius: 6,
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",

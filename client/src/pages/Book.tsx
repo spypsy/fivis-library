@@ -14,6 +14,7 @@ import {
   message,
 } from 'antd';
 import useAxios from 'axios-hooks';
+import BookAuthorsEditor from 'components/BookAuthorsEditor';
 import PageShell from 'components/PageShell';
 import { languages } from 'countries-list';
 import { useTags } from 'hooks/useTags';
@@ -123,7 +124,7 @@ export const Book = () => {
   );
 
   return (
-    <PageShell title={fetchBookData?.title || 'Book'} extra={actions}>
+    <PageShell title={bookData?.title || fetchBookData?.title || 'Book'} extra={actions}>
       <Skeleton loading={!!loading || !!saveLoading} active>
         <div className="book-detail-layout">
           <div className="book-detail-cover">
@@ -138,6 +139,17 @@ export const Book = () => {
           </div>
           <div className="book-detail-meta">
             <Descriptions bordered column={1} size="small">
+              <Descriptions.Item label="Title">
+                {editMode ? (
+                  <Input
+                    placeholder="Title"
+                    value={bookData?.title}
+                    onChange={e => editBookData({ ...bookData!, title: e.target.value })}
+                  />
+                ) : (
+                  bookData?.title
+                )}
+              </Descriptions.Item>
               <Descriptions.Item label="Subtitle">
                 {editMode ? (
                   <Input
@@ -150,7 +162,11 @@ export const Book = () => {
                 )}
               </Descriptions.Item>
               <Descriptions.Item label="Authors">
-                {bookData?.authors?.map(author => author.name).join(', ')}
+                <BookAuthorsEditor
+                  authors={bookData?.authors}
+                  editMode={editMode}
+                  onChange={authors => editBookData({ ...bookData!, authors })}
+                />
               </Descriptions.Item>
               <Descriptions.Item label="Publisher">
                 {editMode ? (

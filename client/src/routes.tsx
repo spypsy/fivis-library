@@ -1,6 +1,8 @@
 import { Spin } from 'antd';
 import { useCheckAuth } from 'hooks/unauthorizedEffect';
 import { Book } from 'pages/Book';
+import AuthorPage from 'pages/Author';
+import Authors from 'pages/Authors';
 import Home from 'pages/Home';
 import Login from 'pages/Login';
 import MyBooks from 'pages/MyBooks';
@@ -24,7 +26,9 @@ const Routes = () => {
       </Route>
       <ProtectedRoute component={Home} path="/home" exact />
       <ProtectedRoute component={MyBooks} path="/my-books" exact />
+      <ProtectedRoute component={Authors} path="/authors" exact />
       <ProtectedRoute component={SearchPage} path="/search" exact />
+      <ProtectedRoute component={AuthorPage} path="/author/:authorName" />
       <ProtectedRoute component={Book} path="/book/:isbn" />
     </Switch>
   );
