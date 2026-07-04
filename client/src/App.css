@@ -331,7 +331,8 @@ p.comment-value {
 }
 
 .user-books-table .ant-table {
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
