@@ -211,7 +211,6 @@ const UserBooksTable = ({
       dataIndex: 'authors',
       key: 'authors',
       width: 200,
-      ellipsis: true,
       render: (authors: UserBook['authors']) => <AuthorLinks authors={authors} />,
       filterDropdown: () => (
         <Search
