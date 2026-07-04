@@ -510,8 +510,18 @@ export default class DB {
   }
 
   public async getUserBooksByAuthor(userId: string, authorId: string) {
-    const books = await this.getUserBooks(userId);
-    return books.filter(book => book.authors?.some(author => author.id === authorId));
+    const entries = await this.bookUserEntryRep
+      .createQueryBuilder('user_entry')
+      .leftJoinAndSelect('user_entry.book', 'book')
+      .leftJoinAndSelect('book.authors', 'author')
+      .leftJoinAndSelect('user_entry.tags', 'tag')
+      .where('user_entry.user.id = :userId', { userId })
+      .andWhere('author.id = :authorId', { authorId })
+      .getMany();
+
+    return entries.map(({ book, ...entry }) => ({
+      ...prepareUserBook(book, entry),
+    }));
   }
 
   public async updateAuthorName(id: string, name: string) {

@@ -1,41 +1,14 @@
-import axios from 'axios';
 import { Button } from 'antd';
-import useAxios from 'axios-hooks';
 import PageShell from 'components/PageShell';
 import UserBooksTable from 'components/UserBooksTable';
-import React, { useCallback, useEffect, useState } from 'react';
-import { UserBook } from 'types';
-import { readMyBooksCache, writeMyBooksCache } from 'utils/myBooksStorage';
+import { useCachedUserBooks } from 'hooks/useCachedUserBooks';
+import React, { useState } from 'react';
 
 const MyBooks = () => {
-  const [booksData, setBooksData] = useState<UserBook[] | undefined>(() => readMyBooksCache());
-  const [{ loading }, refetch] = useAxios<UserBook[]>('/api/books/mine', { manual: true, useCache: false });
+  const { booksData, refreshBooks, showTableLoading } = useCachedUserBooks();
   const [randomBookOpen, setRandomBookOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    refetch().then(response => {
-      if (cancelled) return;
-      const fresh = response.data;
-      if (fresh) {
-        setBooksData(fresh);
-        writeMyBooksCache(fresh);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [refetch]);
-
-  const refreshBooksAfterDelete = useCallback(async () => {
-    const { data } = await axios.get<UserBook[]>('/api/books/mine');
-    setBooksData(data);
-    writeMyBooksCache(data);
-    return data;
-  }, []);
-
   const total = booksData?.length ?? 0;
-  const showTableLoading = loading && booksData === undefined;
 
   return (
     <PageShell
@@ -54,7 +27,7 @@ const MyBooks = () => {
         randomBookOpen={randomBookOpen}
         onRandomBookOpenChange={setRandomBookOpen}
         persistUiState
-        onAfterDelete={refreshBooksAfterDelete}
+        onAfterDelete={refreshBooks}
       />
     </PageShell>
   );
