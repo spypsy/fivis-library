@@ -325,3 +325,12 @@ p.comment-value {
   padding: 8px 12px;
   color: rgba(0, 0, 0, 0.45);
 }
+
+.user-books-table .ant-table col:first-child {
+  min-width: 240px;
+}
+
+.user-books-table .ant-table-thead > tr > th:first-child,
+.user-books-table .ant-table-tbody > tr > td:first-child {
+  min-width: 240px;
+}

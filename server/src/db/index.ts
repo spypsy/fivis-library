@@ -151,7 +151,6 @@ export default class DB {
 
       book = existingBook;
     } else {
-      console.log('bookData', bookData);
       if (!bookData.isbn) {
         return [AddedStatus.ERROR, `${bookData.title}: no ISBN.`];
       }

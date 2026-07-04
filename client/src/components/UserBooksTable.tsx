@@ -177,6 +177,8 @@ const UserBooksTable = ({
       filterIcon: () => <FilterFilled style={{ color: filters.title ? primaryColor : undefined }} />,
       sorter: (a: UserBook, b: UserBook) => (a.title || '').localeCompare(b.title || ''),
       sortOrder: sortedInfo.columnKey === 'title' && sortedInfo.order,
+      onHeaderCell: () => ({ style: { minWidth: 240 } }),
+      onCell: () => ({ style: { minWidth: 240 } }),
     },
     {
       title: 'Publish Year',
@@ -371,14 +373,15 @@ const UserBooksTable = ({
           </Space>
         )}
         <Table
+          className="user-books-table"
           loading={loading}
           dataSource={displayBooks}
           columns={columns}
           rowKey={(book: UserBook) => book.isbn}
-          tableLayout="fixed"
+          tableLayout="auto"
           pagination={{ showSizeChanger: true, pageSizeOptions: [25, 50, 100, 250], defaultPageSize: 50 }}
           onChange={handleChange}
-          scroll={{ x: 900 }}
+          scroll={{ x: 1060 }}
           locale={{
             emptyText: emptyDescription ?? defaultEmpty,
           }}
