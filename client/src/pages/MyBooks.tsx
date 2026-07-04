@@ -39,6 +39,7 @@ const MyBooks = () => {
 
   return (
     <PageShell
+      wide
       title="My books"
       subtitle={total === 1 ? '1 book' : `${total} books`}
       extra={

@@ -167,7 +167,7 @@ p.comment-value {
 }
 
 .ant-layout-content {
-  padding: 16px;
+  padding: 12px 120px;
   background: #fff;
 }
 
@@ -175,6 +175,10 @@ p.comment-value {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+}
+
+.page-shell--wide {
+  max-width: none;
 }
 
 .page-shell--narrow {
@@ -264,7 +268,7 @@ p.comment-value {
   }
 
   .ant-layout-content {
-    padding: 12px 8px;
+    padding: 12px 16px;
   }
 
   .ant-table-wrapper {
@@ -326,11 +330,21 @@ p.comment-value {
   color: rgba(0, 0, 0, 0.45);
 }
 
-.user-books-table .ant-table col:first-child {
-  min-width: 240px;
+.user-books-table .ant-table {
+  width: 100%;
 }
 
-.user-books-table .ant-table-thead > tr > th:first-child,
-.user-books-table .ant-table-tbody > tr > td:first-child {
-  min-width: 240px;
+@media (max-width: 768px) {
+  .user-books-table .ant-table {
+    min-width: 1060px;
+  }
+
+  .user-books-table .ant-table col:first-child {
+    min-width: 240px;
+  }
+
+  .user-books-table .ant-table-thead > tr > th:first-child,
+  .user-books-table .ant-table-tbody > tr > td:first-child {
+    min-width: 240px;
+  }
 }

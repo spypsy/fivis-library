@@ -7,10 +7,14 @@ type PageShellProps = {
   extra?: React.ReactNode;
   children: React.ReactNode;
   narrow?: boolean;
+  /** Use full content width (e.g. wide data tables). */
+  wide?: boolean;
 };
 
-const PageShell: React.FC<PageShellProps> = ({ title, subtitle, extra, children, narrow }) => (
-  <div className={`page-shell${narrow ? ' page-shell--narrow' : ''}`}>
+const PageShell: React.FC<PageShellProps> = ({ title, subtitle, extra, children, narrow, wide }) => (
+  <div
+    className={`page-shell${narrow ? ' page-shell--narrow' : ''}${wide ? ' page-shell--wide' : ''}`}
+  >
     {(title || extra) && (
       <div className="page-shell__header">
         <div>

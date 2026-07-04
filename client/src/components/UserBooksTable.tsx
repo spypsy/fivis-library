@@ -154,7 +154,6 @@ const UserBooksTable = ({
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
-      minWidth: 240,
       ellipsis: true,
       render: (title: string | undefined, book: UserBook) => (
         <Link to={`/book/${book.isbn}`}>
@@ -177,15 +176,14 @@ const UserBooksTable = ({
       filterIcon: () => <FilterFilled style={{ color: filters.title ? primaryColor : undefined }} />,
       sorter: (a: UserBook, b: UserBook) => (a.title || '').localeCompare(b.title || ''),
       sortOrder: sortedInfo.columnKey === 'title' && sortedInfo.order,
-      onHeaderCell: () => ({ style: { minWidth: 240 } }),
-      onCell: () => ({ style: { minWidth: 240 } }),
     },
     {
       title: 'Publish Year',
       dataIndex: 'publishedDate',
       key: 'publishedDate',
-      width: 148,
+      width: 152,
       align: 'center',
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (publishedDate: Date) => <span>{new Date(publishedDate).getFullYear()}</span>,
       filterDropdown: () => (
         <Search
@@ -297,8 +295,9 @@ const UserBooksTable = ({
       title: 'Date Added',
       dataIndex: 'addedAt',
       key: 'addedAt',
-      width: 130,
+      width: 128,
       align: 'center',
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (dateAdded: string) => (
         <span>
           {new Date(dateAdded).toLocaleDateString('en-gb', {
@@ -378,10 +377,9 @@ const UserBooksTable = ({
           dataSource={displayBooks}
           columns={columns}
           rowKey={(book: UserBook) => book.isbn}
-          tableLayout="auto"
+          tableLayout="fixed"
           pagination={{ showSizeChanger: true, pageSizeOptions: [25, 50, 100, 250], defaultPageSize: 50 }}
           onChange={handleChange}
-          scroll={{ x: 1060 }}
           locale={{
             emptyText: emptyDescription ?? defaultEmpty,
           }}
