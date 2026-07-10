@@ -5,8 +5,7 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "craco test",
-    "heroku-postbuild": "craco build"
+    "test": "craco test"
   },
   "proxy": "http://localhost:8080",
   "eslintConfig": {
