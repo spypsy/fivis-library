@@ -1,7 +1,6 @@
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
 
 import auth from './api/auth';
@@ -31,7 +30,7 @@ async function main() {
     credentials: true,
   };
   app.use(cors(corsOptions));
-  app.use(bodyParser.json());
+  app.use(express.json());
   app.use(cookieParser());
 
   app.get('/api/hello', (req, res) => {
@@ -50,11 +49,20 @@ async function main() {
   });
 
   app.use(express.static(clientPath));
-  app.get('/*', (req, res) => {
+  app.get('/{*splat}', (req, res) => {
     res.sendFile('index.html', {
       root: clientPath,
       cacheControl: false,
     });
+  });
+
+  // Last-resort handler: Express 5 forwards errors thrown in async routes here.
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(`${req.method} ${req.originalUrl} failed`, err);
+    if (res.headersSent) {
+      return next(err);
+    }
+    res.status(500).send('Something went wrong');
   });
   app.listen(process.env.PORT || 8080);
 }

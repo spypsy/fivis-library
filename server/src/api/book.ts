@@ -49,7 +49,7 @@ export default (db: DB) => {
     try {
       bookData = await getBookByIsbn(isbn);
     } catch (err) {
-      res.status(400).send(`Error fetching ISBN: ${isbn}. Message: ${err.message}`);
+      return res.status(400).send(`Error fetching ISBN: ${isbn}. Message: ${err.message}`);
     }
     res.send(bookData);
   });

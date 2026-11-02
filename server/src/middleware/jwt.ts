@@ -4,7 +4,8 @@ import * as jwt from 'jsonwebtoken';
 import { DbSingleton } from '../db';
 import { UserDao } from '../db/models/User';
 
-export interface UserAuthRequest extends Request {
+// Route params are plain strings: no route here uses an Express 5 wildcard (which yields string[]).
+export interface UserAuthRequest extends Request<Record<string, string>> {
   user: UserDao; // or any other type
 }
 export function tokenAuth(req: UserAuthRequest, res: Response, next: NextFunction) {
