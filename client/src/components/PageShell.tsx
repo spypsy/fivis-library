@@ -7,7 +7,7 @@ type PageShellProps = {
   extra?: React.ReactNode;
   children: React.ReactNode;
   narrow?: boolean;
-  /** Use full content width (e.g. wide data tables). */
+  /** Size to the content and center it, up to the full content width (e.g. wide data tables). */
   wide?: boolean;
 };
 

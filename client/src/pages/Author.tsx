@@ -102,6 +102,7 @@ const AuthorPage = () => {
 
   return (
     <PageShell
+      wide
       title={
         editMode ? (
           <Input value={nameDraft} onChange={e => setNameDraft(e.target.value)} style={{ maxWidth: 480 }} />

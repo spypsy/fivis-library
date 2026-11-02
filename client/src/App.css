@@ -168,7 +168,7 @@ p.comment-value {
 }
 
 .ant-layout-content {
-  padding: 12px 120px;
+  padding: 12px clamp(16px, 6vw, 120px);
   background: #fff;
 }
 
@@ -179,7 +179,8 @@ p.comment-value {
 }
 
 .page-shell--wide {
-  max-width: none;
+  max-width: 100%;
+  width: fit-content;
 }
 
 .page-shell--narrow {
@@ -336,11 +337,17 @@ p.comment-value {
   max-width: 100%;
 }
 
-@media (max-width: 768px) {
-  .user-books-table .ant-table {
-    min-width: 1060px;
-  }
+/* Columns have fixed widths: size the table to them (a 100% width table has no usable
+   intrinsic width inside the fit-content wide page), and scroll inside it when they don't fit. */
+.user-books-table .ant-table table {
+  width: max-content;
+}
 
+.user-books-table .ant-table-content {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
   .user-books-table .ant-table col:first-child {
     min-width: 240px;
   }
