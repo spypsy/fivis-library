@@ -46,6 +46,7 @@
 }
 
 .header .sign-out-wrapper,
+.header .nav-actions,
 .header .auth-links {
   flex-shrink: 0;
   margin-left: auto;

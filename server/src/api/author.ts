@@ -2,12 +2,13 @@ import express from 'express';
 
 import DB from '../db';
 import { UserAuthRequest } from '../middleware/jwt';
+import { LibraryContextRequest, requireOwnLibrary } from '../middleware/libraryContext';
 
 const router = express.Router();
 
 export default (db: DB) => {
-  router.get('/all', async (req: UserAuthRequest, res) => {
-    const authors = await db.getAuthorSummariesForUser(req.user.id);
+  router.get('/all', async (req: LibraryContextRequest, res) => {
+    const authors = await db.getAuthorSummariesForUser(req.libraryUserId);
     res.send(authors);
   });
 
@@ -21,7 +22,7 @@ export default (db: DB) => {
     res.send(authors.map(author => ({ id: author.id, name: author.name })));
   });
 
-  router.post('/', async (req: UserAuthRequest, res) => {
+  router.post('/', requireOwnLibrary, async (req: UserAuthRequest, res) => {
     const { name } = req.body;
     try {
       const author = await db.createAuthor(name);
@@ -31,18 +32,18 @@ export default (db: DB) => {
     }
   });
 
-  router.get('/by-name/:name', async (req: UserAuthRequest, res) => {
+  router.get('/by-name/:name', async (req: LibraryContextRequest, res) => {
     const name = decodeURIComponent(req.params.name);
     const author = await db.findAuthorByName(name);
     if (!author) {
       return res.status(404).send('Author not found');
     }
 
-    const books = await db.getUserBooksByAuthor(req.user.id, author.id);
+    const books = await db.getUserBooksByAuthor(req.libraryUserId, author.id);
     res.send({ author, books });
   });
 
-  router.put('/:id', async (req: UserAuthRequest, res) => {
+  router.put('/:id', requireOwnLibrary, async (req: UserAuthRequest, res) => {
     const { id } = req.params;
     const { name } = req.body;
     if (!name?.trim()) {

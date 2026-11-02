@@ -7,8 +7,10 @@ import path from 'path';
 import auth from './api/auth';
 import author from './api/author';
 import book from './api/book';
-import DB, { DbSingleton } from './db';
+import share from './api/share';
+import { DbSingleton } from './db';
 import { tokenAuth } from './middleware/jwt';
+import { libraryContext } from './middleware/libraryContext';
 
 const clientPath = path.join(__dirname, '../../client/build');
 
@@ -20,6 +22,7 @@ async function main() {
   const bookRouter = book(db);
   const authorRouter = author(db);
   const authRouter = auth(db);
+  const shareRouter = share(db);
   const corsOptions = {
     origin:
       process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
@@ -34,8 +37,9 @@ async function main() {
   app.get('/api/hello', (req, res) => {
     res.status(200).send('hello there');
   });
-  app.use('/api/books', tokenAuth, bookRouter);
-  app.use('/api/authors', tokenAuth, authorRouter);
+  app.use('/api/books', tokenAuth, libraryContext, bookRouter);
+  app.use('/api/authors', tokenAuth, libraryContext, authorRouter);
+  app.use('/api/shares', tokenAuth, shareRouter);
   app.use('/api/user', authRouter);
   app.use('/api/check-auth', tokenAuth, (req, res) => {
     return res.status(200).send();

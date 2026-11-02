@@ -62,6 +62,8 @@ type UserBooksTableProps = {
   onAfterDelete?: () => Promise<UserBook[]>;
   /** When true, quick filter, column filters, and sort are restored from local storage (my-books page). */
   persistUiState?: boolean;
+  /** When true, hide delete controls (shared library browse). */
+  readOnly?: boolean;
 };
 
 const UserBooksTable = ({
@@ -74,6 +76,7 @@ const UserBooksTable = ({
   emptyDescription,
   onAfterDelete,
   persistUiState = false,
+  readOnly = false,
 }: UserBooksTableProps) => {
   const initialUi = persistUiState ? readMyBooksUiState() : defaultMyBooksTableUiState;
   const [{ data: tagsData }] = useAxios<TagType[]>('/api/tags', { useCache: false });
@@ -311,7 +314,7 @@ const UserBooksTable = ({
       sorter: (a: UserBook, b: UserBook) => new Date(a.addedAt!)!.getTime() - new Date(b.addedAt!)!.getTime(),
       sortOrder: sortedInfo.columnKey === 'addedAt' && sortedInfo.order,
     },
-    ...(showDeleteButtons
+    ...(!readOnly && showDeleteButtons
       ? [
           {
             title: '',
@@ -339,7 +342,9 @@ const UserBooksTable = ({
     });
   }, [filteredBooks, quickFilter]);
 
-  const defaultEmpty = (
+  const defaultEmpty = readOnly ? (
+    <Empty description="No books in this library" />
+  ) : (
     <Empty description="No books yet">
       <Button type="primary" onClick={() => history.push('/home')}>
         Scan your first book
@@ -361,10 +366,12 @@ const UserBooksTable = ({
             />
             <Button onClick={clearFilters}>Clear filters</Button>
             <Button onClick={clearSorting}>Clear sorting</Button>
-            <Space size="small">
-              <Switch checked={showDeleteButtons} onChange={setShowDeleteButtons} />
-              Show delete buttons
-            </Space>
+            {!readOnly && (
+              <Space size="small">
+                <Switch checked={showDeleteButtons} onChange={setShowDeleteButtons} />
+                Show delete buttons
+              </Space>
+            )}
             {showRandomBook && !onRandomBookOpenChange && (
               <Button type="primary" onClick={() => setRandomBookModalOpen(true)}>
                 Random book

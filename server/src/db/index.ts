@@ -6,6 +6,7 @@ import { AuthorDao } from './models/Author';
 import { BookDao } from './models/Book';
 import { BookUserEntryDao } from './models/BookUserEntry';
 import { BookLendEntryDao } from './models/LendEntry';
+import { LibraryShareDao } from './models/LibraryShare';
 import { TagDao } from './models/Tag';
 import { UserDao } from './models/User';
 
@@ -34,7 +35,7 @@ connectionOptions = {
   database: 'data/sqlite.db',
   synchronize: true,
   logging: false, //true,
-  entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, UserDao, TagDao],
+  entities: [AuthorDao, BookDao, BookLendEntryDao, BookUserEntryDao, LibraryShareDao, UserDao, TagDao],
   subscribers: [],
   migrations: [],
 };
@@ -59,6 +60,7 @@ export default class DB {
   private bookRep: Repository<BookDao>;
   private bookLendEntryRep: Repository<BookLendEntryDao>;
   private bookUserEntryRep: Repository<BookUserEntryDao>;
+  private libraryShareRep: Repository<LibraryShareDao>;
   private authorRep: Repository<AuthorDao>;
   private tagRep: Repository<TagDao>;
   private log = (txt: string) => console.log(`\n\n${txt}\n\n`);
@@ -67,6 +69,7 @@ export default class DB {
     this.userRep = this.dataSource.getRepository(UserDao);
     this.bookRep = this.dataSource.getRepository(BookDao);
     this.bookUserEntryRep = this.dataSource.getRepository(BookUserEntryDao);
+    this.libraryShareRep = this.dataSource.getRepository(LibraryShareDao);
     this.authorRep = this.dataSource.getRepository(AuthorDao);
     this.tagRep = this.dataSource.getRepository(TagDao);
   }
@@ -552,6 +555,81 @@ export default class DB {
   public async getUserById(id: number): Promise<UserDao> {
     const user = await this.userRep.findOneBy({ id: id.toString() });
     return user;
+  }
+
+  public async createShare(ownerId: string, username: string): Promise<{ id: string; username: string }> {
+    const target = await this.findUserByUsername(username.trim());
+    if (!target) {
+      throw new Error('User not found');
+    }
+    if (target.id === ownerId) {
+      throw new Error('Cannot share your library with yourself');
+    }
+
+    const existing = await this.libraryShareRep.findOne({
+      where: {
+        owner: { id: ownerId },
+        sharedWith: { id: target.id },
+      },
+    });
+    if (existing) {
+      throw new Error('Already sharing with this user');
+    }
+
+    const share = new LibraryShareDao();
+    share.owner = { id: ownerId } as UserDao;
+    share.sharedWith = target;
+    await this.libraryShareRep.save(share);
+    return { id: target.id, username: target.username };
+  }
+
+  public async revokeShare(ownerId: string, sharedWithId: string): Promise<boolean> {
+    const share = await this.libraryShareRep.findOne({
+      where: {
+        owner: { id: ownerId },
+        sharedWith: { id: sharedWithId },
+      },
+    });
+    if (!share) {
+      return false;
+    }
+    await this.libraryShareRep.remove(share);
+    return true;
+  }
+
+  public async getSharesByOwner(ownerId: string): Promise<{ id: string; username: string }[]> {
+    const shares = await this.libraryShareRep.find({
+      where: { owner: { id: ownerId } },
+      relations: ['sharedWith'],
+    });
+    return shares.map(share => ({
+      id: share.sharedWith.id,
+      username: share.sharedWith.username,
+    }));
+  }
+
+  public async getSharesWithUser(userId: string): Promise<{ id: string; username: string }[]> {
+    const shares = await this.libraryShareRep.find({
+      where: { sharedWith: { id: userId } },
+      relations: ['owner'],
+    });
+    return shares.map(share => ({
+      id: share.owner.id,
+      username: share.owner.username,
+    }));
+  }
+
+  public async canViewLibrary(viewerId: string, ownerId: string): Promise<boolean> {
+    if (viewerId === ownerId) {
+      return true;
+    }
+    const share = await this.libraryShareRep.findOne({
+      where: {
+        owner: { id: ownerId },
+        sharedWith: { id: viewerId },
+      },
+    });
+    return !!share;
   }
 
   public async getTags() {

@@ -1,6 +1,7 @@
 import { Button, Card, Form, Input, Typography, message } from 'antd';
 import useAxios from 'axios-hooks';
 import PageShell from 'components/PageShell';
+import { clearActiveLibrary } from 'hooks/activeLibrary';
 import { notifyAuthChanged } from 'hooks/authSession';
 import React, { useEffect } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -23,6 +24,7 @@ const Login = ({ history }: RouteComponentProps) => {
       message.error(error.response?.data?.message || error.message);
     }
     if (loginData?.user?.id) {
+      clearActiveLibrary();
       setUser(loginData.user);
       notifyAuthChanged();
       history.push('/home');

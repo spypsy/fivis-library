@@ -3,6 +3,7 @@ import axios from 'axios';
 import useAxios from 'axios-hooks';
 import PageShell from 'components/PageShell';
 import UserBooksTable from 'components/UserBooksTable';
+import { useActiveLibrary } from 'hooks/activeLibrary';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Author, UserBook } from 'types';
@@ -19,6 +20,7 @@ const AuthorPage = () => {
   const authorName = decodeURIComponent(encodedName);
   const [editMode, setEditMode] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+  const { isViewingShared } = useActiveLibrary();
 
   const [{ data, loading, error }, refetch] = useAxios<AuthorPageData>(
     {
@@ -65,7 +67,7 @@ const AuthorPage = () => {
     }
   };
 
-  const actions = (
+  const actions = isViewingShared ? undefined : (
     <Space wrap>
       {editMode && (
         <>
@@ -107,21 +109,38 @@ const AuthorPage = () => {
           data?.author.name || authorName
         )
       }
-      subtitle={bookCount === 1 ? '1 book in your library' : `${bookCount} books in your library`}
+      subtitle={
+        bookCount === 1
+          ? `1 book in ${isViewingShared ? 'this' : 'your'} library`
+          : `${bookCount} books in ${isViewingShared ? 'this' : 'your'} library`
+      }
       extra={actions}
     >
       <UserBooksTable
         booksData={data?.books}
         loading={loading}
         showToolbar
-        emptyDescription={<Empty description="No books by this author in your library" />}
-        onAfterDelete={async () => {
-          const name = data?.author.name ?? authorName;
-          const response = await axios.get<AuthorPageData>(
-            `/api/authors/by-name/${encodeURIComponent(name)}`,
-          );
-          return response.data.books;
-        }}
+        readOnly={isViewingShared}
+        emptyDescription={
+          <Empty
+            description={
+              isViewingShared
+                ? 'No books by this author in this library'
+                : 'No books by this author in your library'
+            }
+          />
+        }
+        onAfterDelete={
+          isViewingShared
+            ? undefined
+            : async () => {
+                const name = data?.author.name ?? authorName;
+                const response = await axios.get<AuthorPageData>(
+                  `/api/authors/by-name/${encodeURIComponent(name)}`,
+                );
+                return response.data.books;
+              }
+        }
       />
     </PageShell>
   );

@@ -2,6 +2,7 @@ import express from 'express';
 
 import DB from '../db';
 import { UserAuthRequest } from '../middleware/jwt';
+import { LibraryContextRequest, requireOwnLibrary } from '../middleware/libraryContext';
 import { getBookByIsbn } from '../services/book';
 import { prepareUserBook } from './util';
 
@@ -14,7 +15,7 @@ const normalizeRecommendationTags = (tags: RecommendationTagRequest[]) =>
 
 export default (db: DB) => {
   // store book
-  router.post('/', async (req: UserAuthRequest, res) => {
+  router.post('/', requireOwnLibrary, async (req: UserAuthRequest, res) => {
     const { bookData, manual } = req.body;
     try {
       const result = await db.addBook(bookData, !!manual, req.user);
@@ -24,7 +25,7 @@ export default (db: DB) => {
     }
   });
 
-  router.post('/multi', async (req: UserAuthRequest, res) => {
+  router.post('/multi', requireOwnLibrary, async (req: UserAuthRequest, res) => {
     const booksData = req.body;
     let result;
     try {
@@ -35,8 +36,8 @@ export default (db: DB) => {
     res.send(result);
   });
 
-  router.get('/mine', async (req: UserAuthRequest, res) => {
-    const books = await db.getUserBooks(req.user.id);
+  router.get('/mine', async (req: LibraryContextRequest, res) => {
+    const books = await db.getUserBooks(req.libraryUserId);
     res.send(books);
   });
 
@@ -58,42 +59,50 @@ export default (db: DB) => {
     res.send(books);
   });
 
-  router.post('/search', async (req: UserAuthRequest, res) => {
+  router.post('/search', async (req: LibraryContextRequest, res) => {
     const { search } = req.body;
-    const userId = req.user.id;
-    const books = await db.searchBooks(userId, search);
+    const books = await db.searchBooks(req.libraryUserId, search);
     res.send(books);
   });
 
-  router.post('/random-recommendation', async (req: UserAuthRequest, res) => {
+  router.post('/random-recommendation', async (req: LibraryContextRequest, res) => {
     const tags = Array.isArray(req.body.tags) ? req.body.tags : [];
     const tagOperator = req.body.tagOperator === 'or' ? 'or' : 'and';
-    const result = await db.getRandomBookRecommendation(req.user.id, normalizeRecommendationTags(tags), tagOperator);
+    const result = await db.getRandomBookRecommendation(
+      req.libraryUserId,
+      normalizeRecommendationTags(tags),
+      tagOperator,
+    );
     res.send(result);
   });
 
-  router.get('/:isbn', async (req: UserAuthRequest, res) => {
+  router.get('/:isbn', async (req: LibraryContextRequest, res) => {
     const { isbn } = req.params;
     const book = await db.getBook(isbn);
-    const bookEntry = await db.getBookEntry(req.user.id, isbn);
+    const bookEntry = await db.getBookEntry(req.libraryUserId, isbn);
 
     res.send(prepareUserBook(book, bookEntry));
   });
 
-  router.put('/:isbn', async (req: UserAuthRequest, res) => {
+  router.put('/:isbn', requireOwnLibrary, async (req: UserAuthRequest, res) => {
     const { isbn } = req.params;
     const { bookData } = req.body;
-    const userId = req.user.id;
-    await db.updateBook(userId, isbn, bookData);
-
-    res.send().status(200);
+    try {
+      await db.updateBook(req.user.id, isbn, bookData);
+    } catch (err) {
+      return res.status(400).send(`Error updating book: ${err.message}`);
+    }
+    res.sendStatus(200);
   });
 
-  router.delete('/:isbn', async (req: UserAuthRequest, res) => {
+  router.delete('/:isbn', requireOwnLibrary, async (req: UserAuthRequest, res) => {
     const { isbn } = req.params;
-    const userId = req.user.id;
-    await db.deleteBookEntry(userId, isbn);
-    res.send().status(200);
+    try {
+      await db.deleteBookEntry(req.user.id, isbn);
+    } catch (err) {
+      return res.status(400).send(`Error deleting book: ${err.message}`);
+    }
+    res.sendStatus(200);
   });
 
   // router.get('/all', async (req, res) => {

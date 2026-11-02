@@ -1,8 +1,18 @@
-import { BookOutlined, MenuOutlined, ScanOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
-import { Button, Drawer, Image, Layout, Menu, MenuProps, message } from 'antd';
+import {
+  BookOutlined,
+  DownOutlined,
+  MenuOutlined,
+  ScanOutlined,
+  SearchOutlined,
+  ShareAltOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { Button, Drawer, Dropdown, Image, Layout, Menu, MenuProps, Space, Tag, message } from 'antd';
 import useAxios from 'axios-hooks';
+import { clearActiveLibrary, useActiveLibrary } from 'hooks/activeLibrary';
 import { clearStaleSession, readIsAuthedFromStorage } from 'hooks/authSession';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { User } from 'types';
 import { useLocalStorage } from 'usehooks-ts';
@@ -11,28 +21,11 @@ import logo from './logo.png';
 
 const { Header } = Layout;
 
-const appMenuItems: MenuProps['items'] = [
-  {
-    label: 'Scan',
-    key: 'home',
-    icon: <ScanOutlined />,
-  },
-  {
-    label: 'My Books',
-    key: 'my-books',
-    icon: <BookOutlined />,
-  },
-  {
-    label: 'Authors',
-    key: 'authors',
-    icon: <TeamOutlined />,
-  },
-  {
-    label: 'Search',
-    key: 'search',
-    icon: <SearchOutlined />,
-  },
-];
+type ShareUser = { id: string; username: string };
+type SharesResponse = {
+  sharedByMe: ShareUser[];
+  sharedWithMe: ShareUser[];
+};
 
 function navSelectedKey(pathname: string): string[] {
   const segment = pathname.replace(/^\//, '').split('/')[0];
@@ -48,6 +41,12 @@ const NavBar = () => {
   const [, setUser] = useLocalStorage<User | null>('user', null);
   const [isAuthed, setAuthed] = useState(readIsAuthedFromStorage);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { activeLibrary, setActiveLibrary, isViewingShared } = useActiveLibrary();
+
+  const [{ data: sharesData }, refetchShares] = useAxios<SharesResponse>(
+    { url: '/api/shares' },
+    { manual: true, useCache: false },
+  );
 
   const syncAuth = useCallback(() => {
     setAuthed(readIsAuthedFromStorage());
@@ -80,6 +79,7 @@ const NavBar = () => {
         }
         if (!res.ok) {
           clearStaleSession();
+          clearActiveLibrary();
           setAuthed(false);
         } else {
           setAuthed(true);
@@ -97,6 +97,12 @@ const NavBar = () => {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (isAuthed) {
+      refetchShares();
+    }
+  }, [isAuthed, refetchShares, location.pathname]);
+
   const [, logOut] = useAxios(
     {
       url: '/api/user/logout',
@@ -105,6 +111,35 @@ const NavBar = () => {
     { manual: true },
   );
 
+  const appMenuItems: MenuProps['items'] = useMemo(() => {
+    const items: MenuProps['items'] = [];
+    if (!isViewingShared) {
+      items.push({
+        label: 'Scan',
+        key: 'home',
+        icon: <ScanOutlined />,
+      });
+    }
+    items.push(
+      {
+        label: 'My Books',
+        key: 'my-books',
+        icon: <BookOutlined />,
+      },
+      {
+        label: 'Authors',
+        key: 'authors',
+        icon: <TeamOutlined />,
+      },
+      {
+        label: 'Search',
+        key: 'search',
+        icon: <SearchOutlined />,
+      },
+    );
+    return items;
+  }, [isViewingShared]);
+
   const onClick: MenuProps['onClick'] = e => {
     history.push(`/${e.key}`);
     setDrawerOpen(false);
@@ -112,6 +147,7 @@ const NavBar = () => {
 
   const onLogout = () => {
     setUser(null);
+    clearActiveLibrary();
     setDrawerOpen(false);
     logOut().then(() => {
       history.push('/login');
@@ -120,7 +156,57 @@ const NavBar = () => {
     });
   };
 
-  const logoTarget = isAuthed ? '/home' : '/';
+  const switchToMyLibrary = () => {
+    setActiveLibrary(undefined);
+    history.push('/my-books');
+    setDrawerOpen(false);
+  };
+
+  const switchToSharedLibrary = (owner: ShareUser) => {
+    setActiveLibrary({ ownerId: owner.id, ownerName: owner.username });
+    history.push('/my-books');
+    setDrawerOpen(false);
+  };
+
+  const sharedWithMe = sharesData?.sharedWithMe || [];
+
+  const libraryMenuItems: MenuProps['items'] = [
+    {
+      key: 'mine',
+      label: 'My library',
+      onClick: switchToMyLibrary,
+    },
+    ...(sharedWithMe.length
+      ? [
+          { type: 'divider' as const },
+          ...sharedWithMe.map(owner => ({
+            key: owner.id,
+            label: `${owner.username}'s library`,
+            onClick: () => switchToSharedLibrary(owner),
+          })),
+        ]
+      : []),
+  ];
+
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'sharing',
+      icon: <ShareAltOutlined />,
+      label: 'Sharing',
+      onClick: () => {
+        history.push('/sharing');
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: 'logout',
+      label: 'Sign out',
+      onClick: onLogout,
+    },
+  ];
+
+  const logoTarget = isAuthed ? (isViewingShared ? '/my-books' : '/home') : '/';
+  const libraryLabel = isViewingShared ? `${activeLibrary!.ownerName}'s library` : 'My library';
 
   return (
     <Header className="header">
@@ -139,10 +225,25 @@ const NavBar = () => {
             selectedKeys={navSelectedKey(location.pathname)}
             mode="horizontal"
           />
-          <div className="sign-out-wrapper desktop-menu">
-            <Button type="default" onClick={onLogout}>
-              Sign out
-            </Button>
+          <div className="nav-actions desktop-menu">
+            {isViewingShared && (
+              <Tag color="blue" style={{ marginInlineEnd: 0 }}>
+                Viewing {activeLibrary!.ownerName}&apos;s library
+              </Tag>
+            )}
+            <Dropdown menu={{ items: libraryMenuItems }} trigger={['click']}>
+              <Button type="default">
+                <Space size={4}>
+                  Libraries
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+            <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+              <Button type="default" icon={<UserOutlined />}>
+                Account
+              </Button>
+            </Dropdown>
           </div>
           <Button
             className="mobile-menu-button"
@@ -158,11 +259,36 @@ const NavBar = () => {
             styles={{ body: { padding: 0 } }}
             width={250}
           >
+            {isViewingShared && (
+              <div style={{ padding: '12px 24px' }}>
+                <Tag color="blue">Viewing {activeLibrary!.ownerName}&apos;s library</Tag>
+              </div>
+            )}
             <Menu
               items={appMenuItems}
               onClick={onClick}
               selectedKeys={navSelectedKey(location.pathname)}
               mode="vertical"
+            />
+            <Menu
+              mode="vertical"
+              selectable={false}
+              items={[
+                {
+                  key: 'libraries',
+                  label: `Libraries (${libraryLabel})`,
+                  children: libraryMenuItems,
+                },
+                {
+                  key: 'sharing',
+                  icon: <ShareAltOutlined />,
+                  label: 'Sharing',
+                  onClick: () => {
+                    history.push('/sharing');
+                    setDrawerOpen(false);
+                  },
+                },
+              ]}
             />
             <div style={{ padding: '16px 24px' }}>
               <Button onClick={onLogout} block>

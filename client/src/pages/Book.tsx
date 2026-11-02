@@ -17,6 +17,7 @@ import useAxios from 'axios-hooks';
 import BookAuthorsEditor from 'components/BookAuthorsEditor';
 import PageShell from 'components/PageShell';
 import { languages } from 'countries-list';
+import { useActiveLibrary } from 'hooks/activeLibrary';
 import { useTags } from 'hooks/useTags';
 import dayjs from 'dayjs';
 import isEqual from 'lodash.isequal';
@@ -39,6 +40,7 @@ export const Book = () => {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [bookData, editBookData] = useState<UserBook>();
   const { tags: tagsData } = useTags();
+  const { isViewingShared } = useActiveLibrary();
 
   const [{ data: fetchBookData, loading }] = useAxios<UserBook>(
     {
@@ -91,7 +93,7 @@ export const Book = () => {
     }
   };
 
-  const actions = (
+  const actions = isViewingShared ? undefined : (
     <Space wrap>
       {editMode && (
         <>

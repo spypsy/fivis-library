@@ -3,6 +3,7 @@ import { ColumnProps } from 'antd/es/table';
 import useAxios from 'axios-hooks';
 import AddAuthorModal from 'components/AddAuthorModal';
 import PageShell from 'components/PageShell';
+import { useActiveLibrary } from 'hooks/activeLibrary';
 import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Author, AuthorSummary } from 'types';
@@ -11,6 +12,7 @@ import { authorPagePath } from 'utils/authorPath';
 const Authors = () => {
   const history = useHistory();
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const { isViewingShared } = useActiveLibrary();
   const [{ data: authors, loading }, refetch] = useAxios<AuthorSummary[]>('/api/authors/all', { useCache: false });
 
   const onAuthorCreated = (author: Author) => {
@@ -59,9 +61,11 @@ const Authors = () => {
       title="Authors"
       subtitle={total === 1 ? '1 author' : `${total} authors`}
       extra={
-        <Button type="primary" onClick={() => setAddModalOpen(true)}>
-          Add author
-        </Button>
+        isViewingShared ? undefined : (
+          <Button type="primary" onClick={() => setAddModalOpen(true)}>
+            Add author
+          </Button>
+        )
       }
     >
       <Table
@@ -71,7 +75,9 @@ const Authors = () => {
         rowKey={author => author.id}
         pagination={{ showSizeChanger: true, pageSizeOptions: [25, 50, 100], defaultPageSize: 50 }}
       />
-      <AddAuthorModal open={addModalOpen} onClose={() => setAddModalOpen(false)} onCreated={onAuthorCreated} />
+      {!isViewingShared && (
+        <AddAuthorModal open={addModalOpen} onClose={() => setAddModalOpen(false)} onCreated={onAuthorCreated} />
+      )}
     </PageShell>
   );
 };
