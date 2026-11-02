@@ -16,6 +16,7 @@ function titleForPath(pathname: string): string {
     '/my-books': 'My books',
     '/authors': 'Authors',
     '/search': 'Search',
+    '/sharing': 'Sharing',
   };
   return map[pathname] ?? '';
 }

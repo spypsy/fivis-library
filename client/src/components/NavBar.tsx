@@ -103,6 +103,18 @@ const NavBar = () => {
     }
   }, [isAuthed, refetchShares, location.pathname]);
 
+  // Leave a shared library once its owner has revoked access.
+  useEffect(() => {
+    if (!sharesData || !activeLibrary) {
+      return;
+    }
+    if (!sharesData.sharedWithMe.some(owner => owner.id === activeLibrary.ownerId)) {
+      message.warning(`${activeLibrary.ownerName} is no longer sharing their library with you`);
+      setActiveLibrary(undefined);
+      history.push('/my-books');
+    }
+  }, [sharesData, activeLibrary, setActiveLibrary, history]);
+
   const [, logOut] = useAxios(
     {
       url: '/api/user/logout',
