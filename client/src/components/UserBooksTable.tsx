@@ -386,6 +386,7 @@ const UserBooksTable = ({
           columns={columns}
           rowKey={(book: UserBook) => book.isbn}
           tableLayout="fixed"
+          scroll={{ x: columns.reduce((total, column) => total + Number(column.width ?? 0), 0) }}
           pagination={{ showSizeChanger: true, pageSizeOptions: [25, 50, 100, 250], defaultPageSize: 50 }}
           onChange={handleChange}
           locale={{

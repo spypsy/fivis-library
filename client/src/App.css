@@ -337,16 +337,6 @@ p.comment-value {
   max-width: 100%;
 }
 
-/* Columns have fixed widths: size the table to them (a 100% width table has no usable
-   intrinsic width inside the fit-content wide page), and scroll inside it when they don't fit. */
-.user-books-table .ant-table table {
-  width: max-content;
-}
-
-.user-books-table .ant-table-content {
-  overflow-x: auto;
-}
-
 @media (max-width: 768px) {
   .user-books-table .ant-table col:first-child {
     min-width: 240px;
