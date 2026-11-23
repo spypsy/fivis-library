@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders welcome heading when visiting home route', () => {
+test('shows the log in page when visiting the root while logged out', async () => {
   window.history.pushState({}, '', '/');
   render(<App />);
-  expect(screen.getByText(/Welcome to Fivi/i)).toBeInTheDocument();
+  expect(await screen.findByText(/New here\?/i)).toBeInTheDocument();
 });

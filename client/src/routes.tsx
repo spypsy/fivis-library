@@ -10,7 +10,6 @@ import MyBooks from 'pages/MyBooks';
 import Register from 'pages/Register';
 import SearchPage from 'pages/Search';
 import Sharing from 'pages/Sharing';
-import Welcome from 'pages/Welcome';
 import React from 'react';
 import { Redirect, Route, RouteProps, Switch } from 'react-router-dom';
 
@@ -18,7 +17,7 @@ const Routes = () => {
   return (
     <Switch>
       <Route path="/" exact>
-        <Welcome />
+        <RootRedirect />
       </Route>
       <Route path="/login" exact>
         <Login />
@@ -35,6 +34,19 @@ const Routes = () => {
       <ProtectedRoute component={Book} path="/book/:isbn" />
     </Switch>
   );
+};
+
+const RootRedirect = () => {
+  const { isAuthed, loading } = useCheckAuth();
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+  return <Redirect to={isAuthed ? '/home' : '/login'} />;
 };
 
 interface ProtectedRouteProps extends RouteProps {
